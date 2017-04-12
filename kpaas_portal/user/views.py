@@ -49,17 +49,13 @@ def index():
 @login_required
 def edit_ceph_keys():
     form = EditCephKeysForm()
-
     if form.validate_on_submit():
         keys = ' '.join(
             [form.data.get('ceph_user_id'), form.data.get('ceph_access_key'), form.data.get('ceph_secret_key')])
         current_user.ceph_keys = keys
         current_user.save()
-
         flash(u'成功！新的 Ceph S3 Keys 被保存.', 'success')
-
         return redirect(url_for('user.index'))
-
     return render_template('user/edit_ceph_keys.html', form=form)
 
 
