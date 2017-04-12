@@ -33,8 +33,7 @@ class RegisterForm(Form):
     """
     username = StringField(u'账户', validators=[DataRequired(message=u'请填写用户名.'), is_username])
     email = StringField(u'电子邮件', validators=[DataRequired(message=u'请填写电子邮件.'), Email(message=u'电子邮件格式错误，请检查.')])
-    password = PasswordField(u'密码',
-                             validators=[InputRequired(), EqualTo('confirm_password', message=u'两次输入的密码不一致，请检查.')])
+    password = PasswordField(u'密码', validators=[InputRequired(), EqualTo('confirm_password', message=u'两次输入的密码不一致，请检查.')])
     confirm_password = PasswordField(u'再输入一次密码')
     phone = StringField(u'手机号码')
     corp = StringField(u'公司名称')
@@ -53,5 +52,4 @@ class RegisterForm(Form):
 
 class ForgotPasswordForm(Form):
     email = StringField(u'Email address', validators=[DataRequired(message=u"请输入电子邮件地址."), Email()])
-
     submit = SubmitField(u"重置密码")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    kpaas
+    kpaas-portal.auth
     ~~~~~~~~~~~~~~~
 
     Author: Y.Z.Y
@@ -43,7 +43,7 @@ class User(db.Model, UserMixin):
     last_success_time = db.Column(db.DateTime)
     login_attempts = db.Column(db.Integer, default=0)
     activated = db.Column(db.Boolean, default=False)
-    namespace = db.Column(db.String(50))
+    namespace = db.Column(db.String(50), default='default')
     cluster_count = db.Column(db.Integer, default=0)
     ceph_keys = db.Column(db.String(255))
 
