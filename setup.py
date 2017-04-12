@@ -33,6 +33,8 @@ setup(
     },
     description='KPaaS Portal',
     install_requires=[
+        'gunicorn',
+        'gevent',
         'flask',
         'flask-allows',
         'flask-sqlalchemy',

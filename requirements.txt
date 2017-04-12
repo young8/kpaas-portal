@@ -15,12 +15,17 @@ Flask-Moment==0.5.1
 Flask-Script==2.0.5
 Flask-SQLAlchemy==2.2
 Flask-WTF==0.14.2
+gevent==1.2.1
+greenlet==0.4.12
+gunicorn==19.7.1
 itsdangerous==0.24
 Jinja2==2.9.6
 kombu==4.0.2
+kpaas-portal==1.0
 limits==1.2.1
 Mako==1.0.6
 MarkupSafe==1.0
+MySQL-python==1.2.5
 PyHDFS==0.1.2
 pyhs2==0.6.0
 python-editor==1.0.3

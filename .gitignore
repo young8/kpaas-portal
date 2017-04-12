@@ -30,3 +30,4 @@ examples/
 *.sqlite
 migrations/
 scripts/
+*.env
