@@ -15,11 +15,9 @@
             <div class="panel-body">
                 <form class="form-horizontal" role="form" method="post">
                     {{ form.hidden_tag() }}
-
                     {{ render_field(form.ceph_user_id) }}
                     {{ render_field(form.ceph_access_key) }}
                     {{ render_field(form.ceph_secret_key) }}
-
                     {{ render_submit_field(form.submit) }}
                 </form>
             </div>

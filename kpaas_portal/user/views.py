@@ -61,3 +61,12 @@ def edit_ceph_keys():
         return redirect(url_for('user.index'))
 
     return render_template('user/edit_ceph_keys.html', form=form)
+
+
+@user.route('/profile/resetCephKeys')
+@login_required
+def reset_ceph_keys():
+    current_user.ceph_keys = None
+    current_user.save()
+    flash(u'警告！Ceph S3 Keys 被重置.', 'danger')
+    return redirect(url_for('user.index'))

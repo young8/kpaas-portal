@@ -46,11 +46,11 @@ def create_cluster():
     创建一个新集群
     """
 
-    ceph_key = current_user.ceph_keys
-    ceph_key = ceph_key.split(' ')
-    ceph_host = '{0}.{1}'.format(current_app.config['CEPH_SERVICE_HOSTNAME'], current_app.config['CEPH_SERVICE_DOMAIN'])
-    ceph_info = (ceph_key[1], ceph_key[2], ceph_host)
-    print ceph_info
+    # ceph_key = current_user.ceph_keys
+    # ceph_key = ceph_key.split(' ')
+    # ceph_host = '{0}.{1}'.format(current_app.config['CEPH_SERVICE_HOSTNAME'], current_app.config['CEPH_SERVICE_DOMAIN'])
+    # ceph_info = (ceph_key[1], ceph_key[2], ceph_host)
+    # print ceph_info
 
     if not current_user.ceph_keys:
         flash(u'失败！当前用户没有配置 Ceph S3 Key，请配置账户信息。', 'danger')

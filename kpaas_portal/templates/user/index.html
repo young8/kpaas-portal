@@ -48,9 +48,13 @@
             <div class="panel-heading forum-head">
                 <span class="fa fa-arrow-circle-right"></span>
                 <span class="text text-danger"> Ceph S3 Keys</span>
-                {% if ceph %}
+                {% if not ceph %}
                     <a class="btn btn-link" href="{{ url_for('user.edit_ceph_keys') }}">
                         <span class="fa fa-edit"></span> 编辑
+                    </a>
+                {% else %}
+                    <a class="btn btn-link" href="{{ url_for('user.reset_ceph_keys') }}">
+                        <span class="fa fa-edit"></span> 重置
                     </a>
                 {% endif %}
             </div>
