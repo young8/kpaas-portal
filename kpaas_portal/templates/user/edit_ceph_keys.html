@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    {% from "macros.html" import render_field, render_submit_field %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>User</li>
+            <li><a href="{{ url_for('user.index') }}"> Profile 个人配置</a></li>
+            <li class="active"> 编辑 Ceph S3 Keys</li>
+        </ol>
+        <div class="panel page-panel">
+            <div class="panel-heading">
+                <span class="fa fa-arrow-circle-right"></span> 编辑 Ceph S3 Keys
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal" role="form" method="post">
+                    {{ form.hidden_tag() }}
+
+                    {{ render_field(form.ceph_user_id) }}
+                    {{ render_field(form.ceph_access_key) }}
+                    {{ render_field(form.ceph_secret_key) }}
+
+                    {{ render_submit_field(form.submit) }}
+                </form>
+            </div>
+            <div class="panel-info">
+                <p>或者 <a class="btn btn-link" href="{{ url_for('user.index') }}">取消</a> 操作</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

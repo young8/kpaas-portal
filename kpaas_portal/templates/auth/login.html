@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    {% from "macros.html" import horizontal_field %}
+
+    <div class="panel page-panel">
+        <div class="panel-heading page-head">
+            <span class="fa fa-arrow-circle-right"></span> 登录
+        </div>
+
+        <div class="panel-body">
+            <form class="form-horizontal" role="form" method="POST">
+                {{ form.hidden_tag() }}
+                {{ horizontal_field(form.login)}}
+                {{ horizontal_field(form.password)}}
+                {{ horizontal_field(form.remember_me)}}
+                {{ horizontal_field(form.submit)}}
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

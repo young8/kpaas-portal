@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from 'macros.html' import render_pagination, topic_pages %}
+
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Ceph S3 存储</li>
+            <li class="active"><a class="btn btn-link" href="{{ url_for('ceph.index') }}">S3 Bucket 列表</a></li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <span class="fa fa-arrow-circle-right"></span> Bucket 列表
+            </div>
+
+            <div class="panel-body forum-body">
+                <table class="table table-bordered" style="table-layout: fixed;word-wrap: break-word">
+                    <thead style="background: #eaf1f5">
+                    <tr>
+                        <th>Bucket 状态</th>
+                        <th>Bucket 名称</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% if buckets %}
+                            {% for bucket in buckets %}
+                                <tr>
+                                    <td>
+                                        <span class="label label-success">OK</span>
+                                        Modify: {{ moment(bucket.created).fromNow() }}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('ceph.view_bucket', bucket_id=bucket.id) }}"> {{ bucket.name }}</a>
+                                        <span class="badge"> {{ bucket.objects_count }}</span>
+                                    </td>
+                                    <td>
+                                        {{ moment(bucket.created).format('LLL') }}
+                                    </td>
+                                    <td>
+                                        -
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

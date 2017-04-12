@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Manager</li>
+            <li class="active">Settings 系统配置</li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+
+
+            {% if s %}
+                {% for ss in s %}
+                    <div class="panel-heading forum-head">
+                        <span class="fa fa-arrow-circle-right"></span>
+                        <span class="text text-danger"> {{ ss[0] }}</span>
+                    </div>
+                    <div class="panel-body forum-body">
+                        <table class="table table-responsive">
+                            <thead>
+                            <tr>
+                                <th>项</th>
+                                <th>值</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for sss in ss[1] %}
+                                <tr>
+                                    <td>{{ sss[0] }}</td>
+                                    <td>{{ sss[1] }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

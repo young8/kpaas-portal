@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from 'macros.html' import render_pagination, topic_pages %}
+
+    <div class="index-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li class="active"><a class="btn btn-link" href="{{ url_for('cluster.index') }}">Hadoop 集群列表</a></li>
+        </ol>
+
+        <div class="panel category-panel">
+            <div class="panel-heading category-head">
+                <span class="fa fa-arrow-circle-right"></span> Hadoop 集群列表
+            </div>
+
+            <div class="panel-body category-body">
+                <div class="category-meta">
+                    <div class="col-sm-6 forum-name">状态</div>
+                    <div class="col-sm-2 forum-stats">创建时间</div>
+                    <div class="col-sm-3 forum-stats">公网访问</div>
+                    <div class="col-sm-1 forum-last-post">任务数</div>
+                </div>
+                {% if clusters %}
+                    {% for cluster in clusters %}
+                        <div class="row category-row hover">
+                            <div class="col-sm-6 forum-info">
+                                <div class="row">
+                                    <!-- Icon -->
+                                    <div class="col-sm-2">
+                                        <span class="label label-success">HEALTH</span>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <div class="forum-name">
+                                            <a href="{{ cluster.url }}">{{ cluster.name }}</a>
+                                            <span class="fa fa-link"></span>
+                                            <span class="badge">{{ cluster.agent_count }}</span>
+                                            <p><small>{{ cluster.description }}</small></p>
+                                        </div>
+                                        <div class="forum-description">
+                                            <span class="text-danger">Running: {{ cluster.fromNow }} days ago</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 forum-posts">
+                                <span class="text-danger">{{ cluster.createtime_format }}</span>
+                            </div>
+                            <div class="col-sm-3 forum-status">
+                                {% if cluster.open_url %}
+                                    <a href="http://{{ cluster.open_url }}" target="_blank">{{ cluster.open_url }}</a>
+                                    <span class="fa fa-link"></span>
+                                {% else %}
+                                    <span class="text-danger">No Public.</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-1 forum-posts">
+                                <a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster.id) }}">
+                                    <span class="badge"> {{ cluster.task_count }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-sm-12 clearfix">
+                        No Record.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

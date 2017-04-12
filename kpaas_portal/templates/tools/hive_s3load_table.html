@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from "macros.html" import render_field, render_submit_field, render_select_field %}
+
+    <div class="forum-view">
+        <div class="panel page-panel">
+            <div class="panel-heading">
+                <span class="fa fa-arrow-circle-right"></span> 创建 Hive 表
+            </div>
+            <div class="panel-body">
+                <div class="bs-callout bs-callout-danger">
+                    <h4>Bucket ID: {{ bucket_id }}</h4>
+                    <ul>
+                        <li>{{ input_file }}</li>
+                    </ul>
+                </div>
+                <form class="form-horizontal" role="form" method="post">
+                    {{ form.hidden_tag() }}
+                    {{ render_select_field(form.cluster_id) }}
+                    {{ render_field(form.table_name) }}
+                    {{ render_field(form.table_fields) }}
+                    {{ render_field(form.table_field_separator) }}
+                    {{ render_submit_field(form.submit) }}
+                </form>
+            </div>
+            <div class="panel-info">
+                <p>或者 <a class="btn btn-link" href="{{ url_for('ceph.view_bucket', bucket_id=bucket_id) }}">取消</a> 操作</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

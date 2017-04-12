@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Tools 工具集</li>
+            <li>MR 任务</li>
+            <li><a href="{{ url_for('cluster.view_cluster', cluster_id=task.cluster_id) }}">Hadoop 集群 {{ task.cluster_id }}</a></li>
+            <li><a href="{{ url_for('tools.mr_view_cluster', cluster_id=task.cluster_id) }}">MR 任务列表</a></li>
+            <li class="active">任务 {{ task.id }}</li>
+        </ol>
+
+        <div class="panel topic-panel">
+            <div class="panel-heading topic-head">
+                <a href="{{ task.url }}">MR 任务 {{ task.id }}</a>
+            </div>
+            <div class="post-box col-md-10 col-sm-9 col-xs-12">
+                <div class="post-meta clearfix">
+                    <div class="pull-left">
+                        <a href="{{ url_for('cluster.view_cluster', cluster_id=task.cluster_id) }}">Hadoop 集群 {{ task.cluster_id }}</a>
+                        <small>
+                            (task create at: {{ task.createtime }}, task over at: {{ task.overtime }} by
+                            <a href="#">user: {{ task.owner }}</a>.)
+                        </small>
+                    </div>
+
+                    <div class="pull-right">
+                        <strong># {{ task.id }}</strong>
+                    </div>
+                </div>
+                    <div class="post-content clearfix">
+                        {{ task.data }}
+                        <div class="post-signature hidden-xs">
+                        </div>
+                    </div>
+
+                    <div class="post-footer clearfix">
+                        <!-- Hive/Delete/ Post-->
+                        <div class="post-menu pull-right">
+                            <a class="btn btn-icon icon-prev" href="{{ url_for('tools.mr_view_cluster', cluster_id=task.cluster_id) }}">取消返回</a>
+
+                            <!-- Hive -->
+                            <a class="btn btn-link" href="{{ url_for('tools.hive_new_table', cluster_id=task.cluster_id, task_id=task.id) }}">结果导入 HIVE</a>
+
+                            <!-- Delete Post -->
+                            <form class="inline-form" method="post" action="{{ url_for('tools.mr_delete_task', task_id=task.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <button class="btn btn-icon icon-delete" data-toggle="tooltip" data-placement="top" title="删除此任务"> 删除此任务</button>
+                            </form>
+
+                        </div> <!-- end post-menu -->
+                    </div> <!-- end footer -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

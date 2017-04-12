@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Tools 工具集</li>
+            <li><a href="{{ url_for('tools.mr_list_clusters') }}">MR 任务</a></li>
+            <li><a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster_id) }}">Hadoop 集群 {{ cluster_id }}</a></li>
+            <li class="active">MR 任务列表</li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <span class="fa fa-arrow-circle-right"></span> MR 任务列表
+            </div>
+
+            <div class="panel-body forum-body">
+                <table class="table table-bordered" style="table-layout: fixed;word-wrap: break-word">
+                    <thead style="background: #eaf1f5">
+                    <tr>
+                        <th>任务ID</th>
+                        <th>创建时间</th>
+                        <th>完成时间</th>
+                        <th>耗时</th>
+                        <th>作者</th>
+                        <th>集群名称</th>
+                        <th>任务参数</th>
+                        <th>任务状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.id }}</td>
+                            <td>
+                                <span class="text text-danger">{{ moment(task.createtime).format('LLL') }}</span>
+                            </td>
+                            <td>
+                                <span class="text text-danger">{{ moment(task.overtime).format('LLL') }}</span>
+                            </td>
+                            <td>
+                                <span class="text text-danger">{{ task.remain_time }}</span>
+                            </td>
+                            <td>
+                                {{ task.user.username }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('cluster.view_cluster', cluster_id=cluster_id) }}">
+                                    {{ task.cluster.name }}</a> <span class="fa fa-link"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn-link" data-toggle="modal" data-target="#myModal">参数详细</a>
+                                <span class="fa fa-link"></span>
+                                <!-- Modal -->
+                                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                          <span class="sr-only">Close</span>
+                                        </button>
+                                        <h4 class="modal-title" id="myModalLabel">任务参数</h4>
+                                      </div>
+                                      <div class="modal-body">
+                                          {{ task.data_to_json | safe }}
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div><!-- end Modal -->
+                            </td>
+                            <td>
+                                {% if task.status == "SUCCEEDED" %}
+                                    <span class="label label-success">{{ task.status }}</span>
+                                {% elif task.status == "CREATE" %}
+                                    <span class="label label-warning">{{ task.status }}</span>
+                                {% elif task.status == "RUNNING" %}
+                                    <span class="label label-primary">{{ task.status }}</span>
+                                {% else %}
+                                    <span class="label label-default">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <p><a class="btn btn-link" href="{{ url_for('tools.mr_view_task', task_id=task.id) }}">查看</a> <span class="fa fa-link"></span></p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from "macros.html" import render_submit_field %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li><a href="{{ url_for('cluster.view_cluster', cluster_id=cluster.id) }}"> Hadoop 集群 {{ cluster.id }}</a></li>
+            <li class="active">删除集群</li>
+        </ol>
+
+        <div class="panel page-panel">
+            <div class="panel-heading page-head">
+                <span class="fa fa-arrow-circle-right"></span> 删除集群
+            </div>
+
+            <div class="panel-body">
+                <div class="bs-callout bs-callout-danger">
+                    <h4>确定要删除 Hadoop <strong>集群 {{ cluster.id }}<strong> 吗？</h4>
+                    <p><span class="text text-danger">注意，相关节点及任务都将被删除,请谨慎操作。</span></p>
+                </div>
+                <form class="form-horizontal" role="form" method="post">
+                    {{ form.hidden_tag() }}
+                    {{ render_submit_field(form.submit)}}
+                </form>
+            </div>
+
+            <div class="panel-info">
+                <p>或者<a class="btn btn-link" href="{{ url_for('cluster.view_cluster', cluster_id=cluster.id) }}">取消</a>操作</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

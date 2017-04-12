@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from "macros.html" import horizontal_field %}
+
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li><a href="{{ url_for('cluster.view_cluster', cluster_id=cluster.cluster_id) }}">Hadoop 集群 {{ cluster.cluster_id }}</a></li>
+            <li class="active">创建 MR 任务</li>
+        </ol>
+        <div class="panel page-panel">
+            <div class="panel-heading">
+            <span class="fa fa-arrow-circle-right"></span> 创建一个 MR 任务
+        </div>
+            <div class="panel-body">
+                <div class="bs-callout bs-callout-danger">
+                    <h4>{{ cluster.cluster_name }}</h4>
+                    <ul>
+                        <li>NameNode: {{ cluster.hadoop_nn }}</li>
+                        <li>ResourceManager: {{ cluster.hadoop_rm }}</li>
+                        <li>Oozie Server: {{ cluster.hadoop_oozie }}</li>
+                    </ul>
+                </div>
+
+                <form class="form-horizontal" role="form" enctype="multipart/form-data" method="post">
+                    {{ form.hidden_tag() }}
+
+                    {{ horizontal_field(form.upload_file)}}
+                    {{ horizontal_field(form.task_job_input)}}
+                    {{ horizontal_field(form.task_job_output)}}
+                    {{ horizontal_field(form.task_job_mapClass)}}
+                    {{ horizontal_field(form.task_job_reduceClass)}}
+                    {{ horizontal_field(form.task_job_keyClass)}}
+                    {{ horizontal_field(form.task_job_valueClass)}}
+
+                    {{ horizontal_field(form.submit)}}
+                </form>
+            </div>
+            <div class="panel-info">
+                <p>或者 <a class="btn btn-link" href="{{ url_for('cluster.view_cluster', cluster_id=cluster.cluster_id) }}">取消</a> 操作</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

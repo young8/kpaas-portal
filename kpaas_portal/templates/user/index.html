@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>User</li>
+            <li class="active">
+                <a href="{{ url_for('user.index') }}"> Profile 个人配置</a>
+            </li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <span class="fa fa-arrow-circle-right"></span>
+                <span class="text text-danger"> User 账户信息</span>
+            </div>
+
+            <div class="panel-body forum-body">
+                <ul>
+                    <li>登录名: {{ user.username }}</li>
+                    <li>是否为管理员: {{ user.is_admin }}</li>
+                    <li>电子邮件: {{ user.email }}</li>
+                    <li>电话: {{ user.phone }}</li>
+                    <li>公司名: {{ user.corp }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <span class="fa fa-arrow-circle-right"></span>
+                <span class="text text-danger"> K8S Namespace</span>
+            </div>
+
+            <div class="panel-body forum-body">
+                <ul>
+                    <li>Kubernetes Namespace：{{ kubernetes.namespace }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <span class="fa fa-arrow-circle-right"></span>
+                <span class="text text-danger"> Ceph S3 Keys</span>
+                {% if ceph %}
+                    <a class="btn btn-link" href="{{ url_for('user.edit_ceph_keys') }}">
+                        <span class="fa fa-edit"></span> 编辑
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="panel-body forum-body">
+                {% if ceph %}
+                    <ul>
+                        <li>user_id: {{ ceph.user_id }}</li>
+                        <li>access_key: {{ ceph.access_key }}</li>
+                        <li>secret_key: {{ ceph.secret_key }}</li>
+                    </ul>
+                {% else %}
+                    <p class="text text-danger">没有记录，请申请并修改！</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% from "macros.html" import render_field, render_submit_field, render_select_field %}
+
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li><a class="btn btn-link" href="{{ url_for('main.index') }}">首页</a></li>
+            <li>申请集群</li>
+        </ol>
+        <div class="panel page-panel">
+            <div class="panel-heading">
+                <span class="fa fa-arrow-circle-right"></span> 集群申请
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal" role="form" method="post">
+                    {{ form.hidden_tag() }}
+
+                    {{ render_field(form.cluster_description) }}
+                    {{ render_select_field(form.cluster_type) }}
+                    {{ render_select_field(form.cluster_machine) }}
+
+                    {{ render_submit_field(form.submit) }}
+                </form>
+            </div>
+            <div class="panel-info">
+                <p>或者 <a class="btn btn-link" href="{{ url_for('main.index') }}">取消</a> 操作</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

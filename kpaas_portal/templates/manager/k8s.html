@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Manager</li>
+            <li class="active">Kubernetes 服务</li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <a class="btn btn-link" href="{{ url_for('manager.k8s') }}">
+                    <span class="fa fa-refresh"></span> 刷新
+                </a>
+                <span class="fa fa-arrow-circle-right"></span> K8S Pods 列表
+            </div>
+
+            <div class="panel-body forum-body">
+                <table class="table table-bordered" style="table-layout: fixed;word-wrap: break-word">
+                    <thead style="background: #eaf1f5">
+                        <tr>
+                            <th>Pod 状态</th>
+                            <th>Pod 名称</th>
+                            <th>Pod IP</th>
+                            <th>Node 名称</th>
+                            <th>Node IP</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-rows">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <a class="btn btn-link" href="#">
+                    <span class="fa fa-refresh"></span> 刷新
+                </a>
+                <span class="fa fa-arrow-circle-right"></span> K8S Service 列表
+            </div>
+            <div class="panel-body forum-body">
+                <table class="table table-responsive">
+                    <thead>
+                    <tr>
+                        <th>Service 名称</th>
+                        <th>Pod IP</th>
+                        <th>Pod Port</th>
+                        <th>Node Port</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% if services %}
+                            {% for service in services %}
+                                <tr>
+                                    <td>{{ service['service_name'] }}</td>
+                                    <td>{{ service['service_ip'] }}</td>
+                                    <td>{{ service['service_sport'] }}</td>
+                                    <td>{{ service['service_dport'] }}</td>
+                                </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+    $(document).ready(pods());
+    setInterval("pods()",10000); //每格1秒刷新一次
+
+    function pods(){
+          $.getJSON("http://111.235.158.169:10030/api/v1.0/k8s/namespaces/default/pods", function(data) {
+              $(".table-rows").empty();
+              var tag_status = "";
+              var row = "";
+              $.each(data["result"],function(k,v) {
+                  if (v["pod_status"] == "Running") {
+                      tag_status = '<span class="label label-success">' + v["pod_status"] + '</span>';
+                  } else {
+                      tag_status = '<span class="label label-danger">' + v["pod_status"] + '</span>';
+                  };
+                  row += "<tr>" +
+                    "<td>" + tag_status + "</td>" +
+                    "<td>" + v["pod_name"] + "</td>" +
+                    "<td>" + v["pod_ip"] + "</td>" +
+                    "<td>" + v["pod_node"] + "</td>" +
+                    "<td>" + v["pod_node_ip"] + "</td>" +
+                    "</tr>";
+              });
+              $(".table-rows").append(row)});
+              return false;
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+    <div class="panel page-panel">
+        <div class="panel-heading page-head">
+            <a id="btn_refresh" class="btn btn-link"
+               href="{{ url_for('cluster.deploy_cluster', cluster_id=cluster.id) }}"><span class="fa fa-refresh"></span>
+                刷新</a> Hadoop 集群 {{ cluster.id }}
+        </div>
+
+        <div class="panel-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>节点 HOST</th>
+                    <th>节点 IP</th>
+                    <th>节点 STATUS</th>
+                    <th>节点 CHECKED</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if pods %}
+                    {% for pod in pods %}
+                        <tr>
+                            <td>{{ pod.name }}</td>
+                            <td>{{ pod.sip }}</td>
+                            <td>
+                                {% if pod.status== "Running" %}
+                                    <span class="label label-success">{{ pod.status }}</span>
+                                {% else %}
+                                    <span class="label label-danger">{{ pod.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if pod.configure== "HEALTHY" %}
+                                    <span class="label label-success">{{ pod.configure }}</span>
+                                {% else %}
+                                    <span class="label label-danger">{{ pod.configure }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+
+            <form class="form-horizontal" role="form" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="control-group">
+                    <div class="controls">
+                        {{ form.submit(class="btn btn-primary") }}
+                        或 <a class="btn btn-link"
+                             href="{{ url_for('cluster.view_cluster', cluster_id=cluster.id) }}">取消</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

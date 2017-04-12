@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='icon/favicon.ico') }}">
+        <title>
+            {% block title %}
+                {% if title %} {{ title }} {% endif %}
+            {% endblock %}
+        </title>
+
+        {% block stylesheets %}
+            <!-- Bootstrap CSS -->
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        {% endblock %}
+
+        {% block css %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/application.css') }}">
+        {% endblock %}
+    </head>
+    <body>
+    <!-- main forum layout -->
+        <div class="flaskbb-layout">
+            <div class="container">
+
+            <!-- the main layout -->
+            {% block header %}
+                <div class="flaskbb-header">
+                    <div class="flaskbb-meta">
+                        <div class="flaskbb-title">KPaaS</div>
+                        <div class="flaskbb-subtitle">PaaS On Kubernetes + Docker</div>
+                    </div>
+                </div><!-- end header -->
+            {% endblock %}
+
+            {% block navigation %}
+                <div class="navbar navbar-default" role="navigation">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </button>
+                    </div>
+
+                    <div class="collapse navbar-collapse">
+
+                        {% if current_user and current_user.is_authenticated %}
+                        <!-- navbar left -->
+                        <ul class="nav navbar-nav forum-nav">
+                            {%- from "macros.html" import is_active, topnav with context -%}
+                            {{ topnav(endpoint='main.index', name='首页', active=active_forum_nav) }}
+                            {{ topnav(endpoint='cluster.index', name='Hadoop 集群') }}
+                            {{ topnav(endpoint='ceph.index', name='Ceph 存储') }}
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                     Tools 工具集
+                                </a>
+                                <ul class="dropdown-menu dropdown-messages">
+                                    <li><a href="{{ url_for('tools.mr_list_clusters') }}">MR 任务</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url_for('tools.hive_list_clusters') }}">Hive 数据仓库</a></li>
+                                </ul>
+                            </li>
+
+                            {{ topnav(endpoint='myapp.index', name='App 应用') }}
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                     Manager 管理
+                                </a>
+                                <ul class="dropdown-menu dropdown-messages">
+                                    <li><a href="{{ url_for('manager.k8s') }}">Kubernetes</a></li>
+                                    <li><a href="{{ url_for('manager.buckets') }}">Ceph S3</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url_for('manager.consul') }}">Consul</a></li>
+                                    <li><a href="{{ url_for('manager.haproxy') }}">HAProxy</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="{{  url_for('manager.users') }}">User</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <!-- navbar right -->
+                        <ul class="nav navbar-nav navbar-right">
+                            <!-- login user -->
+                            <li>
+                                <div class="btn-group btn-group-sm navbar-btn user-btn">
+                                    <a class="btn btn-primary" href="{{ url_for('user.index', username=current_user.username) }}">
+                                        <span class="fa fa-user"></span> {{ current_user.username }}
+                                    </a>
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
+                                    </ul>
+                                </div>
+                            </li><!-- end login user -->
+                        </ul> <!-- end navbar right -->
+
+                        {% else %}
+                            <!-- Not logged in - Login/Register -->
+                            <ul class="nav navbar-nav navbar-right">
+                                <li>
+                                    <div class="btn-group btn-group-sm navbar-btn user-btn">
+                                        <a class="btn btn-primary" href="{{ url_for('auth.login') }}">
+                                            <span class="fa fa-user"></span> Login
+                                        </a>
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                                            <li><a href="{{ url_for('auth.forgot_password') }}">Reset Password</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul><!-- end Not logged in nav -->
+                        {% endif %}
+                    </div> <!-- end navbar-collapse -->
+                </div><!-- end navbar -->
+            {% endblock %}
+
+            {% block messages %}
+                <!-- the messages -->
+                <div id="flashed-messages">
+                    {% include "flashed_messages.html" %}
+                </div><!-- end messages -->
+            {% endblock %}
+
+            <!-- the content block -->
+            {% block content %}
+            {% endblock %}
+        </div><!-- end container -->
+
+            <!-- the footer block -->
+            {% block footer %}
+                <footer class="flaskbb-footer">
+                    <div class="container">
+                        <p class="text-muted pull-left">powered by CT PaaS</p>
+                        <p class="text-muted pull-right">&copy; 2016</p>
+                    </div>
+                </footer><!-- end footer -->
+            {% endblock %}
+        </div><!-- end main layout -->
+
+        {% block javascript %}
+            <!-- jQuery first, then Bootstrap JS. -->
+            <script src="{{ url_for('static', filename='js/jquery-2.1.4.js') }}"></script>
+            <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        {% endblock %}
+
+        {% block scripts %}
+            {{ moment.include_moment() }}
+        {% endblock %}
+    </body>
+</html>

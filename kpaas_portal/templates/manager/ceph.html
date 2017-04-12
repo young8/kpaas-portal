@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="forum-view">
+        <ol class="breadcrumb flaskbb-breadcrumb">
+            <li>Manager</li>
+            <li class="active">Ceph S3</li>
+        </ol>
+
+        <div class="row controls-row">
+            <div class="pull-left">
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <a class="btn btn-link" href="{{ url_for('manager.buckets') }}">
+                    <span class="fa fa-refresh"></span> 刷新
+                </a>
+                <span class="fa fa-arrow-circle-right"></span> Ceph S3 Bucket 列表
+            </div>
+
+            <div class="panel-body forum-body">
+                <table class="table table-bordered" style="table-layout: fixed;word-wrap: break-word">
+                    <thead style="background: #eaf1f5">
+                    <tr>
+                        <th>Bucket 名称</th>
+                        <th>创建时间</th>
+                        <th>标识</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% if buckets %}
+                            {% for bucket in buckets %}
+                                <tr>
+                                    <td>
+                                        <a href = {{ url_for('manager.view_bucket', bucket=bucket.name) }}>{{ bucket.name }}</a>
+                                    </td>
+                                    <td>
+                                        {{ moment(bucket.created).format('LLL') }}
+                                    </td>
+                                    <td>
+                                        -
+                                    </td>
+                                    <td>
+                                        -
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel-footer">
+                <table class="table table-responsive">
+                    <thead>
+                    <tr>
+                        <th>文件名称</th>
+                        <th>文件大小</th>
+                        <th>修改时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if bucket %}
+                        {% for c in content %}
+                            <tr>
+                                <td>
+                                    {{ c.name }}
+                                </td>
+                                <td>
+                                    <span class="text text-primary"> {{ c.size }} </span>
+                                </td>
+                                <td>
+                                    <span class="text text-danger">{{ moment(c.modified).format('LLL') }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel forum-panel">
+            <div class="panel-heading forum-head">
+                <a class="btn btn-link" href="#">
+                    <span class="fa fa-refresh"></span> 刷新
+                </a>
+                <span class="fa fa-arrow-circle-right"></span> Ceph User 列表
+            </div>
+            <div class="panel-body forum-body">
+                <table class="table table-responsive">
+                    <thead>
+                    <tr>
+                        <th>user_id</th>
+                        <th>access_key</th>
+                        <th>secret_key</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
