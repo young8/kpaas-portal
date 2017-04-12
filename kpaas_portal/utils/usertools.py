@@ -16,8 +16,7 @@ def create_admin_user(username, password):
     user.password = password
     user.activated = True
     user.is_admin = True
-    user.save()
-    user.namespace = 'ns-{0}'.format(user.id)
+    user.namespace = 'default'
     user.save()
 
     return user
