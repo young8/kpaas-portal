@@ -8,7 +8,7 @@
 """
 
 from datetime import datetime
-from flask import Blueprint, redirect, url_for, render_template, request, flash
+from flask import Blueprint, redirect, url_for, render_template, request, flash, current_app
 from flask_login import current_user, login_user, logout_user
 
 from kpaas_portal.auth.forms import LoginForm, RegisterForm, ForgotPasswordForm
@@ -24,6 +24,7 @@ def login():
     """
     登录
     """
+    current_app.logger.info('GET /login')
     if current_user is not None and current_user.is_authenticated:
         return redirect(url_for('main.index'))
     form = LoginForm(request.form)

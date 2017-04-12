@@ -12,8 +12,8 @@ import os
 import logging
 from flask import Flask, g, render_template
 from flask_login import current_user
-from kpaas_portal.extensions import db, moment, login_manager, cors, celery, migrate, cache, limiter, allows, csrf
 
+from kpaas_portal.extensions import db, moment, login_manager, cors, celery, migrate, cache, limiter, allows, csrf
 from kpaas_portal.user.models import User, Guest
 
 
@@ -22,23 +22,17 @@ def create_app(config=None):
     工厂函数
     """
     app = Flask(__name__)
-
     app.config.from_object(config)
-
+    # 配置celery
     configure_celery_app(app, celery)
-
     # 蓝本
     configure_blueprints(app)
-
     # 扩展插件
     configure_extensions(app)
-
     # Add the before request handler
     app.before_request(create_before_request(app))
-
     # logging
     configure_logging(app)
-
     return app
 
 
@@ -184,36 +178,33 @@ def configure_errorhandlers(app):
 
 
 def configure_logging(app):
-    """Configures logging."""
-
+    """
+    配置日志
+    """
     logs_folder = os.path.join(app.root_path, os.pardir, "logs")
 
+    # info log
     formatter = logging.Formatter(
         '%(asctime)s %(levelname)s: %(message)s '
         '[in %(pathname)s:%(lineno)d]')
 
-    # info log
     info_log = os.path.join(logs_folder, app.config['INFO_LOG'])
-
     info_file_handler = logging.handlers.RotatingFileHandler(
-        info_log,
+        'log.info',
         maxBytes=10 * 1024 * 1024,
         backupCount=10
     )
-
     info_file_handler.setLevel(logging.INFO)
     info_file_handler.setFormatter(formatter)
     app.logger.addHandler(info_file_handler)
 
     # error log
     error_log = os.path.join(logs_folder, app.config['ERROR_LOG'])
-
     error_file_handler = logging.handlers.RotatingFileHandler(
-        error_log,
+        'log.error',
         maxBytes=10 * 1024 * 1024,
         backupCount=10
     )
-
     error_file_handler.setLevel(logging.ERROR)
     error_file_handler.setFormatter(formatter)
     app.logger.addHandler(error_file_handler)
