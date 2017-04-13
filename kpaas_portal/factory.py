@@ -8,7 +8,6 @@
     
 """
 
-import os
 import logging
 from flask import Flask, g, render_template
 from flask_login import current_user
@@ -37,6 +36,9 @@ def create_app(config=None):
 
 
 def create_before_request(app):
+    """
+    配置上下文
+    """
     def before_request():
         g.db = db
         g.config = app.config
@@ -47,10 +49,9 @@ def create_before_request(app):
 
 def configure_celery_app(app, celery):
     """
-    Configures the celery app.
+    配置 celery
     """
     from celery import platforms
-
     platforms.C_FORCE_ROOT = True
 
     app.config.update({
@@ -58,7 +59,6 @@ def configure_celery_app(app, celery):
         'RESULT_BACKEND': app.config['CELERY_RESULT_BACKEND']
     })
     celery.conf.update(app.config)
-
     task_base = celery.Task
 
     class ContextTask(task_base):
@@ -72,39 +72,33 @@ def configure_celery_app(app, celery):
 
 
 def configure_blueprints(app):
-
+    """
+    配置蓝图
+    """
     # 主页面
     from kpaas_portal.main.views import main as main_blueprint
     app.register_blueprint(main_blueprint, url_prefix='')
-
     # 注册 登录 退出
     from kpaas_portal.auth.views import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_perfix='/auth')
-
     # Hadoop 集群
     from kpaas_portal.cluster.views import cluster as cluster_blueprint
     app.register_blueprint(cluster_blueprint, url_prefix='/cluster')
-
     # Ceph 存储
     from kpaas_portal.ceph.views import ceph as ceph_blueprint
     app.register_blueprint(ceph_blueprint, url_prefix='/ceph')
-
     # 工具集
     from kpaas_portal.tools.views import tools as tools_blueprint
     app.register_blueprint(tools_blueprint, url_prefix='/tools')
-
     # 应用
     from kpaas_portal.myapp.views import myapp as myapp_blueprint
     app.register_blueprint(myapp_blueprint, url_prefix='/myapp')
-
     # 用户
     from kpaas_portal.user.views import user as user_blueprint
     app.register_blueprint(user_blueprint, url_prefix='/user')
-
     # 系统管理
     from kpaas_portal.manager.views import manager as manager_blueprint
     app.register_blueprint(manager_blueprint, url_prefix='/manager')
-
     # REST API
     from kpaas_portal.api_1_0.service import api as api_1_0_blueprint
     app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
@@ -112,30 +106,22 @@ def configure_blueprints(app):
 
 def configure_extensions(app):
     """
-    Configures the extensions.
+    配置扩展
     """
-
     # Flask-WTF CSRF
     csrf.init_app(app)
-
     # Flask-Moment
     moment.init_app(app)
-
     # Flask-SQLAlchem
     db.init_app(app)
-
     # Flask-Migrate
     migrate.init_app(app, db)
-
     # Flask-Cache
     cache.init_app(app)
-
     # Flask-Limiter
     limiter.init_app(app)
-
     # Flask-cors
     cors.init_app(app)
-
     # Flask-Login
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
@@ -161,9 +147,8 @@ def configure_extensions(app):
 
 def configure_errorhandlers(app):
     """
-    Configures the error handlers.
+    配置错误处理
     """
-
     @app.errorhandler(403)
     def forbidden_page(error):
         return render_template("errors/forbidden_page.html"), 403
@@ -181,30 +166,14 @@ def configure_logging(app):
     """
     配置日志
     """
-    logs_folder = os.path.join(app.root_path, os.pardir, "logs")
-
-    # info log
     formatter = logging.Formatter(
         '%(asctime)s %(levelname)s: %(message)s '
         '[in %(pathname)s:%(lineno)d]')
-
-    info_log = os.path.join(logs_folder, app.config['INFO_LOG'])
     info_file_handler = logging.handlers.RotatingFileHandler(
-        'log.info',
+        app.config['APP_LOG'],
         maxBytes=10 * 1024 * 1024,
         backupCount=10
     )
-    info_file_handler.setLevel(logging.INFO)
+    info_file_handler.setLevel(logging.DEBUG)
     info_file_handler.setFormatter(formatter)
     app.logger.addHandler(info_file_handler)
-
-    # error log
-    error_log = os.path.join(logs_folder, app.config['ERROR_LOG'])
-    error_file_handler = logging.handlers.RotatingFileHandler(
-        'log.error',
-        maxBytes=10 * 1024 * 1024,
-        backupCount=10
-    )
-    error_file_handler.setLevel(logging.ERROR)
-    error_file_handler.setFormatter(formatter)
-    app.logger.addHandler(error_file_handler)

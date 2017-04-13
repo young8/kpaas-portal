@@ -19,10 +19,8 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = False
 
-    # Logs
-    INFO_LOG = 'info.log'
-    ERROR_LOG = 'error.log'
-    CELERY_LOG = 'celery.log'
+    # Log
+    APP_LOG = 'kpaas-portal.log'
 
     # Security
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'secret key'
