@@ -29,8 +29,9 @@ def k8s():
     k8s
     """
     k8s = K8sServiceClass(namespace='default')
+    k8s_apiserver = current_app.config['K8S_SERVICE_ADDR']
 
-    return render_template('manager/k8s.html', services=k8s.services(), pods=k8s.pods())
+    return render_template('manager/k8s.html', apiserver=k8s_apiserver, services=k8s.services(), pods=k8s.pods())
 
 
 @manager.route("/consul")

@@ -78,10 +78,10 @@
     {{ super() }}
     <script>
     $(document).ready(pods());
-    setInterval("pods()",10000); //每格1秒刷新一次
+    setInterval("pods()",50000); //每格5秒刷新一次
 
     function pods(){
-          $.getJSON("http://111.235.158.169:10030/api/v1.0/k8s/namespaces/default/pods", function(data) {
+          $.getJSON("http://{{ apiserver }}:10030/api/v1.0/k8s/namespaces/default/pods", function(data) {
               $(".table-rows").empty();
               var tag_status = "";
               var row = "";
