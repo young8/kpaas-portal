@@ -16,12 +16,10 @@ from werkzeug.contrib.fixers import ProxyFix
 from kpaas_portal.factory import create_app, db
 from kpaas_portal.utils.usertools import create_admin_user
 
-# try:
-#     from kpaas_portal.configs.development import DevelopmentConfig as Config
-# except ImportError:
-#     from kpaas_portal.configs.default import DefaultConfig as Config
-
-from kpaas_portal.configs.default import DefaultConfig as Config
+try:
+    from kpaas_portal.configs.development import DevelopmentConfig as Config
+except ImportError:
+    from kpaas_portal.configs.default import DefaultConfig as Config
 
 app = create_app(Config)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -29,7 +27,7 @@ manager = Manager(app)
 
 
 # Run local server
-manager.add_command("runserver", Server("localhost", port=8899))
+manager.add_command("runserver", Server("localhost", port=8000))
 
 # Migration commands
 manager.add_command('db', MigrateCommand)
