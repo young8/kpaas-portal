@@ -23,19 +23,17 @@ manager = Blueprint('manager', __name__)
 
 
 @manager.route('/k8s')
-@cache.cached(timeout=60)
+# @cache.cached(timeout=60)
 def k8s():
     """
-    k8s
+    k8s 查询
     """
-    k8s = K8sServiceClass(namespace='default')
-    k8s_apiserver = current_app.config['K8S_SERVICE_ADDR']
-
-    return render_template('manager/k8s.html', apiserver=k8s_apiserver, services=k8s.services(), pods=k8s.pods())
+    k8s_instance = K8sServiceClass(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'], namespace='default')
+    return render_template('manager/k8s.html', services=k8s_instance.services(), pods=k8s_instance.pods())
 
 
 @manager.route("/consul")
-@cache.cached(timeout=60)
+# @cache.cached(timeout=60)
 def consul():
     """
     Consul

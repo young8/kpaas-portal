@@ -23,6 +23,8 @@ class DevelopmentConfig(DefaultConfig):
     CELERY_RESULT_BACKEND = 'redis://192.168.1.240:6379/0'
     # K8S
     K8S_SERVICE_ADDR = '111.235.158.169'
+    K8S_SERVICE_PORT = 10030
+    K8S_APISERVER = 'http://111.235.158.169:10030'
     # Consul
     CONSUL_HOST_ADDR = '192.168.1.240'
     # http://{host}/DHP...

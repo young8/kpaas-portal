@@ -23,34 +23,29 @@ HEADERS = {'Content-Type': 'application/json'}
 
 
 class K8sServiceClass(object):
-    def __init__(self, host=None, port=None, namespace='default'):
+    def __init__(self, host, port, namespace):
         """
-
-        :param str host:
-        :param int port:
-        :param str namespace:
-        :return:
+        K8S 操作
+        :param str host: 主机
+        :param int port: 端口
+        :param str namespace: 名称空间
         """
-        if host:
-            self.host = host
-        else:
-            self.host = current_app.config['K8S_SERVICE_ADDR']
-
-        if port:
-            self.port = port
-        else:
-            self.port = current_app.config['K8S_SERVICE_PORT']
-
-        self.base_url = 'http://{0}:{1}/api/{2}'.format(self.host, self.port, VERSION)
-        self.namespace = namespace
+        self.base_url = 'http://{0}:{1}/api/{2}/namespaces/{3}'.format(host, port, VERSION, namespace)
+        current_app.logger.debug('base url: {0}'.format(self.base_url))
 
     def pods(self):
-        url = '{0}/namespaces/{1}/pods'.format(self.base_url, self.namespace)
+        """
+        查询 pod 列表
+        :return: list
+        """
+        url = '{0}/pods'.format(self.base_url)
+        current_app.logger.debug('url: {}'.format(url))
         try:
             res = requests.get(url)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return []
+        current_app.logger.debug('http status code: {}'.format(res.status_code))
         if res.status_code != 200:
             return []
         items = res.json()['items']
@@ -66,11 +61,11 @@ class K8sServiceClass(object):
 
     def pod_create(self, data):
         result = False
-        url = '{0}/namespaces/{1}/pods'.format(self.base_url, self.namespace)
+        url = '{0}/pods'.format(self.base_url)
         try:
             res = requests.post(url, data=data, headers=HEADERS)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return False
         if res.status_code == 201:
             result = True
@@ -79,11 +74,11 @@ class K8sServiceClass(object):
 
     def pod_delete(self, pod_name):
         result = False
-        url = '{0}/namespaces/{1}/pods/{2}'.format(self.base_url, self.namespace, pod_name)
+        url = '{0}/pods/{1}'.format(self.base_url, pod_name)
         try:
             res = requests.delete(url, headers=HEADERS)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return False
         if res.status_code == 200:
             result = True
@@ -92,11 +87,11 @@ class K8sServiceClass(object):
 
     def pod_view(self, pod_name):
         result = {}
-        url = '{0}/namespaces/{1}/pods/{2}'.format(self.base_url, self.namespace, pod_name)
+        url = '{0}/pods/{1}'.format(self.base_url, pod_name)
         try:
             res = requests.get(url, headers=HEADERS, timeout=10)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return {}
         if res.status_code == 200:
             result = res.json()
@@ -104,11 +99,11 @@ class K8sServiceClass(object):
         return result
 
     def services(self):
-        url = '{0}/namespaces/{1}/services'.format(self.base_url, self.namespace)
+        url = '{0}/services'.format(self.base_url)
         try:
             res = requests.get(url)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return []
         if res.status_code != 200:
             return []
@@ -123,11 +118,11 @@ class K8sServiceClass(object):
 
     def service_delete(self, service_name):
         result = False
-        url = '{0}/namespaces/{1}/services/{2}'.format(self.base_url, self.namespace, service_name)
+        url = '{0}/services/{1}'.format(self.base_url, service_name)
         try:
             res = requests.delete(url, headers=HEADERS)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return False
         if res.status_code == 200:
             result = True
@@ -136,11 +131,11 @@ class K8sServiceClass(object):
 
     def service_view(self, service_name):
         result = {}
-        url = '{0}/namespaces/{1}/services/{2}'.format(self.base_url, self.namespace, service_name)
+        url = '{0}/services/{2}'.format(self.base_url, service_name)
         try:
             r = requests.get(url)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return {}
         if r.status_code == 200:
             result = r.json()
@@ -149,11 +144,11 @@ class K8sServiceClass(object):
 
     def service_create(self, data):
         result = False
-        url = '{0}/namespaces/{1}/services'.format(self.base_url, self.namespace)
+        url = '{0}/services'.format(self.base_url)
         try:
             res = requests.post(url, data=data, headers=HEADERS)
         except Exception as e:
-            print e
+            current_app.logger.error('exception: {}'.format(e))
             return False
         if res.status_code == 201:
             result = True
