@@ -75,7 +75,7 @@
                         {% if services %}
                             {% for service in services %}
                                 <tr>
-                                    <td>{{ service['service_name'] }}</td>
+                                    <td><span class="label label-primary">{{ service['service_name'] }}</span></td>
                                     <td>{{ service['service_ip'] }}</td>
                                     <td>{{ service['service_sport'] }}</td>
                                     <td>{{ service['service_dport'] }}</td>

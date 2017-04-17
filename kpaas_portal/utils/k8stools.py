@@ -17,6 +17,7 @@ from kpaas_portal.utils.consultools import ConsulServiceClass
 from kpaas_portal.utils.ambaritools import AmbariServiceClass
 from kpaas_portal.cluster.models import Pod, Service, Cluster
 from kpaas_portal.user.models import User
+from kpaas_portal.exceptions import KubeApiError
 
 VERSION = 'v1'
 HEADERS = {'Content-Type': 'application/json'}
@@ -38,26 +39,24 @@ class K8sServiceClass(object):
         查询 pod 列表
         :return: list
         """
-        url = '{0}/pods'.format(self.base_url)
-        current_app.logger.debug('url: {}'.format(url))
         try:
+            url = '{0}/pods'.format(self.base_url)
+            current_app.logger.debug('url: {}'.format(url))
             res = requests.get(url)
-        except Exception as e:
-            current_app.logger.error('exception: {}'.format(e))
-            return []
-        current_app.logger.debug('http status code: {}'.format(res.status_code))
-        if res.status_code != 200:
-            return []
-        items = res.json()['items']
-        result = []
-        if items:
-            result = [{'pod_name': item['metadata'].get('name', ''),
-                       'pod_hostname': item['spec']['containers'][0].get('name', ''),
-                       'pod_ip': item['status'].get('podIP', ''),
-                       'pod_status': item['status'].get('phase', ''),
-                       'pod_node': item['spec'].get('nodeName', ''),
-                       'pod_node_ip': item['status'].get('hostIP', '')} for item in items]
-        return result
+            if res.status_code != requests.codes.OK:
+                raise KubeApiError('kube api get pods error. http code: {}'.format(res.status_code))
+            items = res.json()['items']
+            result = []
+            if items:
+                result = [{'pod_name': item['metadata'].get('name', ''),
+                           'pod_hostname': item['spec']['containers'][0].get('name', ''),
+                           'pod_ip': item['status'].get('podIP', ''),
+                           'pod_status': item['status'].get('phase', ''),
+                           'pod_node': item['spec'].get('nodeName', ''),
+                           'pod_node_ip': item['status'].get('hostIP', '')} for item in items]
+            return result
+        except (requests.Timeout, requests.ConnectionError, KeyError) as e:
+            raise KubeApiError('kube api server connect failed ({})'.format(e))
 
     def pod_create(self, data):
         result = False
@@ -99,22 +98,27 @@ class K8sServiceClass(object):
         return result
 
     def services(self):
-        url = '{0}/services'.format(self.base_url)
+        """
+        查询 service 列表
+        :return: list
+        """
+
         try:
+            url = '{0}/services'.format(self.base_url)
+            current_app.logger.debug('url: {}'.format(url))
             res = requests.get(url)
-        except Exception as e:
-            current_app.logger.error('exception: {}'.format(e))
-            return []
-        if res.status_code != 200:
-            return []
-        items = res.json()['items']
-        result = []
-        if items:
-            result = [{'service_name': item['metadata']['name'],
-                       'service_ip': item['spec']['portalIP'],
-                       'service_sport': item['spec']['ports'][0]['port'],
-                       'service_dport': item['spec']['ports'][0].get('nodePort', '')} for item in items]
-        return result
+            if res.status_code != requests.codes.OK:
+                raise KubeApiError('kube api get service error. http code: {}'.format(res.status_code))
+            items = res.json()['items']
+            result = []
+            if items:
+                result = [{'service_name': item['metadata']['name'],
+                           'service_ip': item['spec']['portalIP'],
+                           'service_sport': item['spec']['ports'][0]['port'],
+                           'service_dport': item['spec']['ports'][0].get('nodePort', '')} for item in items]
+            return result
+        except (requests.Timeout, requests.ConnectionError, KeyError) as e:
+            raise KubeApiError('kube api server connect failed ({})'.format(e))
 
     def service_delete(self, service_name):
         result = False

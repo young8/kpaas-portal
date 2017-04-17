@@ -20,3 +20,7 @@ class AuthorizationRequired(BaseError, Forbidden):
 
 class AuthenticationError(BaseError):
     description = "Invalid username and password combination."
+
+
+class KubeApiError(BaseError):
+    description = "Kubernetes API Error."
