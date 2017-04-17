@@ -10,40 +10,35 @@
 import requests
 from flask import current_app
 
+from kpaas_portal.exceptions import ConsulApiError
+
 
 class ConsulServiceClass(object):
-    def __init__(self, host=None, port=None):
+    def __init__(self, host, port):
         """
-
-        :param str host:
-        :param int port:
-        :param str scheme:
-        :return:
+        consul 服务接口操作
+        :param str host: 主机
+        :param int port: 端口
         """
-
-        if host:
-            self.host = host
-        else:
-            self.host = current_app.config['CONSUL_HOST_ADDR']
-
-        if port:
-            self.port = port
-        else:
-            self.port = current_app.config['CONSUL_HOST_PORT']
-
+        self.host = host
+        self.port = port
         self.base_url = 'http://{0}:{1}/v1'.format(self.host, self.port)
         self.headers = {'Content-Type': 'application/json'}
+        current_app.logger.debug('consul api base url: {0}'.format(self.base_url))
 
     def nodes(self):
         """
-
-        :return: dict
+        获取 node 列表
         """
-        url = '{0}/catalog/nodes'.format(self.base_url)
-        res = requests.get(url)
-        if res.status_code == 200:
+        try:
+            url = '{0}/catalog/nodes'.format(self.base_url)
+            current_app.logger.debug('consul api url: {0}'.format(url))
+            res = requests.get(url, headers=self.headers)
+            if res.status_code != requests.codes.OK:
+                raise ConsulApiError('consul api get nodes error. http code: {}'.format(res.status_code))
             return res.json()
-        return {}
+        except (requests.Timeout, requests.ConnectionError, KeyError) as e:
+            raise ConsulApiError('consul api server connect failed ({})'.format(e))
 
     def node_view(self, node_name):
         """

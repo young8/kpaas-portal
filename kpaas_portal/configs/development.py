@@ -24,9 +24,9 @@ class DevelopmentConfig(DefaultConfig):
     # K8S
     K8S_SERVICE_ADDR = '111.235.158.169'
     K8S_SERVICE_PORT = 10002 + 21
-    K8S_APISERVER = 'http://{0}:{1}'.format(K8S_SERVICE_ADDR, K8S_SERVICE_PORT)
     # Consul
-    CONSUL_HOST_ADDR = '192.168.1.240'
+    CONSUL_SERVICE_ADDR = '111.235.158.169'
+    CONSUL_SERVICE_PORT = 10004 + 21
     # http://{host}/DHP...
     HDP = 'http://127.0.0.1/HDP/centos7/2.x/updates/2.3.4.0'
     HDP_UTILS = 'http://127.0.0.1/HDP-UTILS-1.1.0.20/repos/centos7'

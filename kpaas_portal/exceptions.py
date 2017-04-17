@@ -24,3 +24,7 @@ class AuthenticationError(BaseError):
 
 class KubeApiError(BaseError):
     description = "Kubernetes API Error."
+
+
+class ConsulApiError(BaseError):
+    description = "Consul API Error."

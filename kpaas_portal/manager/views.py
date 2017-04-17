@@ -42,7 +42,7 @@ def consul():
     _services = []
     _ceph = []
 
-    consul_instance = ConsulServiceClass()
+    consul_instance = ConsulServiceClass(host=current_app.config['CONSUL_SERVICE_ADDR'], port=current_app.config['CONSUL_SERVICE_PORT'])
     consul_nodes = consul_instance.nodes()
 
     for node in consul_nodes:

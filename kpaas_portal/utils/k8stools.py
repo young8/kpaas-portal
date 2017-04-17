@@ -32,7 +32,7 @@ class K8sServiceClass(object):
         :param str namespace: 名称空间
         """
         self.base_url = 'http://{0}:{1}/api/{2}/namespaces/{3}'.format(host, port, VERSION, namespace)
-        current_app.logger.debug('base url: {0}'.format(self.base_url))
+        current_app.logger.debug('kube api base url: {0}'.format(self.base_url))
 
     def pods(self):
         """
@@ -41,7 +41,7 @@ class K8sServiceClass(object):
         """
         try:
             url = '{0}/pods'.format(self.base_url)
-            current_app.logger.debug('url: {}'.format(url))
+            current_app.logger.debug('k8s api url: {}'.format(url))
             res = requests.get(url)
             if res.status_code != requests.codes.OK:
                 raise KubeApiError('kube api get pods error. http code: {}'.format(res.status_code))

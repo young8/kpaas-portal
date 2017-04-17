@@ -44,8 +44,8 @@ class DefaultConfig(object):
     K8S_SERVICE_ADDR = '127.0.0.1'
     K8S_SERVICE_PORT = 8080
     # Consul
-    CONSUL_HOST_ADDR = '127.0.0.1'
-    CONSUL_HOST_PORT = 8500
+    CONSUL_SERVICE_ADDR = '127.0.0.1'
+    CONSUL_SERVICE_PORT = 8500
     # Docker Images
     AMBARI_SERVER = 'kpaas/c7-server:v1.0'
     AMBARI_AGENT = 'kpaas/c7-agent:v1.1'
