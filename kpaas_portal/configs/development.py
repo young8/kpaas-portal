@@ -16,15 +16,15 @@ class DevelopmentConfig(DefaultConfig):
 
     # ------------- upgrade ------------- #
     # DB
-    SQLALCHEMY_DATABASE_URI = 'mysql://kpaas:123456@192.168.1.240:3306/kpaas'
+    SQLALCHEMY_DATABASE_URI = 'mysql://kpaas:123456@36.111.132.117:10016/kpaas'
     SQLALCHEMY_ECHO = True
     # Celery
-    CELERY_BROKER_URL = 'redis://192.168.1.240:6379/1'
-    CELERY_RESULT_BACKEND = 'redis://192.168.1.240:6379/0'
+    CELERY_BROKER_URL = 'redis://36.111.132.117:10015/1'
+    CELERY_RESULT_BACKEND = 'redis://36.111.132.117:10015/0'
     # K8S
     K8S_SERVICE_ADDR = '111.235.158.169'
-    K8S_SERVICE_PORT = 10030
-    K8S_APISERVER = 'http://111.235.158.169:10030'
+    K8S_SERVICE_PORT = 10002 + 21
+    K8S_APISERVER = 'http://{0}:{1}'.format(K8S_SERVICE_ADDR, K8S_SERVICE_PORT)
     # Consul
     CONSUL_HOST_ADDR = '192.168.1.240'
     # http://{host}/DHP...
