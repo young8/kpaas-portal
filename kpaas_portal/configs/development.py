@@ -30,8 +30,6 @@ class DevelopmentConfig(DefaultConfig):
     # http://{host}/DHP...
     HDP = 'http://127.0.0.1/HDP/centos7/2.x/updates/2.3.4.0'
     HDP_UTILS = 'http://127.0.0.1/HDP-UTILS-1.1.0.20/repos/centos7'
-    # Ceph
-    CEPH_SERVICE_IP = '127.0.0.1'
     # Oozie
     OOZIE_SERVICE = 'http://127.0.0.1:8080/paas-task-service'
     # Haproxy

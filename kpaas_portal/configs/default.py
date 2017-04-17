@@ -55,6 +55,7 @@ class DefaultConfig(object):
     HDP = 'http://127.0.0.1/HDP/centos7/2.x/updates/2.3.4.0'
     HDP_UTILS = 'http://127.0.0.1/HDP-UTILS-1.1.0.20/repos/centos7'
     # Ceph
+    CEPH_CLOSED = True
     CEPH_SERVICE_HOSTNAME = 's3'
     CEPH_SERVICE_DOMAIN = 'node.dc1.consul'
     CEPH_SERVICE_IP = '127.0.0.1'

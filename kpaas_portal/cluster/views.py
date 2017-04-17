@@ -52,7 +52,7 @@ def create_cluster():
     # ceph_info = (ceph_key[1], ceph_key[2], ceph_host)
     # print ceph_info
 
-    if not current_user.ceph_keys:
+    if not current_app.config['CEPH_CLOSED'] and not current_user.ceph_keys:
         flash(u'失败！当前用户没有配置 Ceph S3 Key，请配置账户信息。', 'danger')
         return redirect(current_user.url)
 
@@ -60,6 +60,9 @@ def create_cluster():
 
     if request.method == 'POST':
         # 初始化一个集群信息
+        current_app.logger.debug('create cluster: description is {0}, type is {1}, machine is {2}'.format(form.cluster_description.data,
+                                                                                                          form.cluster_type.data,
+                                                                                                          form.cluster_machine.data))
         cluster_instance = Cluster(form.cluster_description.data, form.cluster_type.data, form.cluster_machine.data)
         cluster_instance.save(current_user)
         cluster_instance.name = 'cluster{0}'.format(cluster_instance.id)

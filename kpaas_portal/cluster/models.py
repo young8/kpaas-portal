@@ -242,7 +242,7 @@ class Pod(db.Model, CRUDMixin):
                         'resources': {
                             'limits': {
                                 'cpu': '4',
-                                'memory': '10Gi'
+                                'memory': '8Gi'
                             }
                         },
                         'image': current_app.config['AMBARI_SERVER'],
@@ -280,8 +280,8 @@ class Pod(db.Model, CRUDMixin):
                         ],
                         'resources': {
                             'limits': {
-                                'cpu': '8',
-                                'memory': '16Gi'
+                                'cpu': '4',
+                                'memory': '8Gi'
                             }
                         },
                         'image': current_app.config['AMBARI_AGENT'],

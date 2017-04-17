@@ -166,23 +166,23 @@ def celery_node_delete(self, k8s_namespace, pod_name, service_name=None):
         "Node": pod_name
     }
 
-    consul_instance = ConsulServiceClass()
+    consul_instance = ConsulServiceClass(host=current_app.config['CONSUL_SERVICE_ADDR'], port=current_app.config['CONSUL_SERVICE_PORT'])
     consul_instance.node_deregister(json.dumps(node))
-    print '---> [consul]: node delete over: {0}'.format(pod_name)
+    current_app.logger.debug('celery api delete cluster node: consul delete node is {0}'.format(pod_name))
 
-    k8s_instance = K8sServiceClass(namespace=k8s_namespace)
+    k8s_instance = K8sServiceClass(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'], namespace=k8s_namespace)
     if service_name:
         k8s_instance.service_delete(service_name)
-        print '---> [k8s] service delete over: {0}'.format(service_name)
+        current_app.logger.debug('celery api delete cluster node: kube delete service is: {0}'.format(service_name))
 
+    current_app.logger.debug('celery api delete cluster node: kube delete node is {0}, begin.'.format(pod_name))
     k8s_instance.pod_delete(pod_name)
-    print '---> [k8s]: pod delete begin: {0}'.format(pod_name)
     while True:
         if not k8s_instance.pod_view(pod_name):
             break
         self.update_state(state='PROGRESS')
         time.sleep(10)
-    print '---> [k8s]: pod delete over: {0}'.format(pod_name)
+    current_app.logger.debug('celery api delete cluster node: kube delete node is {0}, end.'.format(pod_name))
 
     return {'result': True}
 
@@ -210,7 +210,7 @@ def celery_cluster_create(self, k8s_namespace, pod_id, service_id=None):
     print '---> [k8s] create pod_id: {0}, pod_name: {1}.'.format(pod_instance.id, pod_instance.name)
 
     # 注册 DNS
-    consul_instance = ConsulServiceClass()
+    consul_instance = ConsulServiceClass(current_app.config['CONSUL_SERVICE_ADDR'], current_app.config['CONSUL_SERVICE_PORT'])
     consul_instance.node_register(pod_instance.to_consul_node_json())
     print '---> [consul] node register pod: {0}, ip: {1}'.format(pod_instance.name, pod_instance.sip)
 
