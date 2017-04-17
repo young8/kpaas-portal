@@ -12,11 +12,12 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class RegisterBucketForm(Form):
+class FindBucketForm(Form):
     """
-    注册 ceph s3 bucket
+    查询 ceph s3 的 bucket
     """
-    bucket_name = StringField(label=u'Bucket 名称',
-                              validators=[DataRequired(message=u'请填写 Bucket 名称.')])
-    submit = SubmitField(label=u'注册一个 Bucket')
+    ceph_username = StringField(label=u'User ID', validators=[DataRequired(message=u'请填写用户名称.')])
+    ceph_access_key = StringField(label=u'Access Key', validators=[DataRequired(message=u'请填写 Access Key.')])
+    ceph_secret_key = StringField(label=u'Secret key', validators=[DataRequired(message=u'请填写Secret key.')])
+    submit = SubmitField(label=u'查询')
 

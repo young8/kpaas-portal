@@ -9,7 +9,7 @@
 
 from flask import Blueprint, render_template, request, current_app, logging
 from flask_login import current_user
-from forms import RegisterBucketForm
+from .forms import FindBucketForm
 
 from kpaas_portal.extensions import cache
 from kpaas_portal.cluster.models import Service
@@ -82,27 +82,26 @@ def haproxy():
 @manager.route('/ceph/buckets', methods=['POST', 'GET'])
 def buckets():
     """
-    Ceph Buckets
+    获取 Ceph Buckets 列表
     """
-    form = RegisterBucketForm()
-
-    ceph_keys = (current_user.ceph_keys).split()
-    ceph_instance = CephClass(ceph_keys[1], ceph_keys[2])
-    buckets = ceph_instance.get_all_buckets()
-
+    buckets = []
+    form = FindBucketForm()
     if request.method == 'POST':
-        print form.data
+        current_app.logger.debug('ceph api get buckets: post data="{}"'.format(form.data))
+        access_key = form.data.ceph_access_key
+        secret_key = form.data.secret_key
+        ceph_instance = CephClass(access_key, secret_key)
+        buckets = ceph_instance.get_all_buckets()
 
     return render_template('manager/ceph.html', buckets=buckets, form=form)
 
 
 @manager.route('/ceph/buckets/<bucket>')
-@cache.cached(timeout=60)
+# @cache.cached(timeout=60)
 def view_bucket(bucket):
     """
     Ceph Bucket Objects
     """
-
     ceph_keys = (current_user.ceph_keys).split()
     ceph_instance = CephClass(ceph_keys[1], ceph_keys[2])
     buckets = ceph_instance.get_all_buckets()
