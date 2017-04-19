@@ -7,6 +7,8 @@
 
 """
 
+import Queue
+
 from flask import (Blueprint, render_template, redirect, url_for, flash, request, logging, current_app)
 from flask_login import login_required, current_user
 
@@ -63,6 +65,7 @@ def create_cluster():
         current_app.logger.debug('create cluster: description is {0}, type is {1}, machine is {2}'.format(form.cluster_description.data,
                                                                                                           form.cluster_type.data,
                                                                                                           form.cluster_machine.data))
+        q = Queue.Queue()
         # write into db: cluster
         cluster_instance = Cluster(form.cluster_description.data, form.cluster_type.data, form.cluster_machine.data)
         cluster_instance.save(current_user)
@@ -72,10 +75,12 @@ def create_cluster():
         # write into db: service
         server_service = Service('server', cluster_instance, current_user.namespace)
         server_service.save()
+        q.put({'service': server_service.name})
         # write into db: server pod
         server_pod = Pod('server', cluster_instance, current_user.namespace)
         server_pod.status = 'pending'
         server_pod.save()
+        q.put({'pod': server_pod.name})
         # write into db: agent pod
         agent_number = int(cluster_instance.type)
         for i in range(1, agent_number + 1):
@@ -83,8 +88,11 @@ def create_cluster():
             agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
             agent_pod.status = 'pending'
             agent_pod.save()
+            q.put({'pod': agent_pod.name})
         cluster_instance.status = 'creating'
         cluster_instance.save(current_user)
+        while not q.empty():
+            current_app.logger.debug('jobs is: {}'.format(q.get()))
         return redirect(url_for('cluster.index'))
 
         # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])

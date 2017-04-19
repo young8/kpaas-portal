@@ -503,6 +503,7 @@ class Service(db.Model, CRUDMixin):
         self.type = type
         self.cluster = cluster
         self.namespace = namespace
+        self.name = '{0}-8080'.format(cluster.name)
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
