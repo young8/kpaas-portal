@@ -51,6 +51,9 @@ class User(db.Model, UserMixin):
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
     clusters = db.relationship('Cluster', backref='user', lazy='dynamic')
 
+    def __repr__(self):
+        return "<{} {}>".format(self.__class__.__name__, self.username)
+
     @property
     def url(self):
         return url_for('user.index', username=self.username)
@@ -61,9 +64,6 @@ class User(db.Model, UserMixin):
         if not days_registered:
             return 1
         return days_registered
-
-    def __repr__(self):
-        return "<{} {}>".format(self.__class__.__name__, self.username)
 
     def _get_password(self):
         return self._password

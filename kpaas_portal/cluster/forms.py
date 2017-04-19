@@ -25,7 +25,7 @@ class ClusterCreateForm(Form):
                                default=3, validators=[Required(u"请选择节点数量。")])
     cluster_machine = SelectField(label=u"节点配置",
                                   choices=[
-                                      ("ss", u"Tiny (4C CPU, 8G MEM)"),
+                                      ("t", u"Tiny (4C CPU, 8G MEM)"),
                                       ("s", u"Small (8C CPU, 16G MEM)"),
                                       ("m", u"Normal (12C CPU, 32G MEM)"),
                                       ("l", u"Large (16C CPU, 32G MEM)")],

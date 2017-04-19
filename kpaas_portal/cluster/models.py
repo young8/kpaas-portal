@@ -26,6 +26,7 @@ class Cluster(db.Model, CRUDMixin):
     description = db.Column(db.String(255))
     type = db.Column(db.Integer, default=0)
     machine = db.Column(db.String(1), default='s')
+    status = db.Column(db.String(100))
     cluster_deployment = db.Column(db.SmallInteger, default=0)
     agents_deployment = db.Column(db.SmallInteger, default=0)
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
@@ -134,6 +135,7 @@ class Pod(db.Model, CRUDMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
+    namespace = db.Column(db.String(50))
     sip = db.Column(db.String(50))
     sport = db.Column(db.Integer)
     status = db.Column(db.String(50))
@@ -147,13 +149,14 @@ class Pod(db.Model, CRUDMixin):
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
 
-    def __init__(self, pod_type, cluster, pod_name=None):
+    def __init__(self, pod_type, cluster, namespace, pod_name=None):
         if pod_name:
-            self.name = 'cluster-{0}-{1}'.format(cluster.id, pod_name)
+            self.name = '{0}-{1}'.format(cluster.name, pod_name)
         else:
-            self.name = 'cluster-{0}-{1}'.format(cluster.id, pod_type)
+            self.name = '{0}-{1}'.format(cluster.name, pod_type)
         self.type = pod_type
         self.cluster = cluster
+        self.namespace = namespace
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
@@ -481,6 +484,7 @@ class Service(db.Model, CRUDMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), index=True)
+    namespace = db.Column(db.String(50))
     selector_pod = db.Column(db.String(200))
     sip = db.Column(db.String(50))
     sport = db.Column(db.Integer)
@@ -495,9 +499,10 @@ class Service(db.Model, CRUDMixin):
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
 
-    def __init__(self, type, cluster):
+    def __init__(self, type, cluster, namespace):
         self.type = type
         self.cluster = cluster
+        self.namespace = namespace
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)

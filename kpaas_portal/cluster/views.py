@@ -63,35 +63,39 @@ def create_cluster():
         current_app.logger.debug('create cluster: description is {0}, type is {1}, machine is {2}'.format(form.cluster_description.data,
                                                                                                           form.cluster_type.data,
                                                                                                           form.cluster_machine.data))
+        # write into db: cluster
         cluster_instance = Cluster(form.cluster_description.data, form.cluster_type.data, form.cluster_machine.data)
         cluster_instance.save(current_user)
         cluster_instance.name = 'cluster{0}'.format(cluster_instance.id)
+        cluster_instance.status = 'pending'
         cluster_instance.save(current_user)
-
-        # 1、创建 ambari server
-        server_pod = Pod('server', cluster_instance)
-        server_pod.save()
-
-        server_service = Service('server', cluster_instance)
+        # write into db: service
+        server_service = Service('server', cluster_instance, current_user.namespace)
         server_service.save()
-
-        celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])
-
-        # 2、创建 hive mysql
-        hive_mysql_pod = Pod('hivedb', cluster_instance)
-        hive_mysql_pod.save()
-        celery_cluster_create.apply_async(args=['default', hive_mysql_pod.id])
-
-        node_number = int(cluster_instance.type)
-        for i in range(1, node_number + 1):
+        # write into db: server pod
+        server_pod = Pod('server', cluster_instance, current_user.namespace)
+        server_pod.save()
+        # write into db: agent pod
+        agent_number = int(cluster_instance.type)
+        for i in range(1, agent_number + 1):
             name = 'agent{0}'.format(i)
-            mp_deploy_node(name, cluster_instance, 'default')
+            agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
+            agent_pod.save()
+        cluster_instance.status = 'creating'
+        cluster_instance.save(current_user)
         return redirect(url_for('cluster.index'))
+
+        # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])
+        #
+        # # 2、创建 hive mysql
+        # hive_mysql_pod = Pod('hivedb', cluster_instance)
+        # hive_mysql_pod.save()
+        # celery_cluster_create.apply_async(args=['default', hive_mysql_pod.id])
 
     return render_template('cluster/cluster_create.html', form=form)
 
 
-@cluster.route('/<cluster_id>')
+@cluster.route('/<int:cluster_id>')
 def view_cluster(cluster_id):
     """
     查看并管理一个集群

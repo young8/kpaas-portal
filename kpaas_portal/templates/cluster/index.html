@@ -15,48 +15,59 @@
 
             <div class="panel-body category-body">
                 <div class="category-meta">
-                    <div class="col-sm-6 forum-name">状态</div>
-                    <div class="col-sm-2 forum-stats">创建时间</div>
-                    <div class="col-sm-3 forum-stats">公网访问</div>
+                    <div class="col-sm-6 forum-name">信息</div>
+                    <div class="col-sm-2 forum-stats">记录</div>
+                    <div class="col-sm-3 forum-stats">服务</div>
                     <div class="col-sm-1 forum-last-post">任务数</div>
                 </div>
                 {% if clusters %}
                     {% for cluster in clusters %}
                         <div class="row category-row hover">
-                            <div class="col-sm-6 forum-info">
+                            <div class="col-sm-5 forum-info">
                                 <div class="row">
                                     <!-- Icon -->
                                     <div class="col-sm-2">
-                                        <span class="label label-success">HEALTH</span>
+                                        {% if cluster.status == 'succeed' %}
+                                            <span class="label label-success">{{ cluster.status }}</span>
+                                        {% else %}
+                                            <span class="label label-warning">{{ cluster.status }}</span>
+                                        {% endif %}
                                     </div>
                                     <div class="col-sm-10">
                                         <div class="forum-name">
-                                            <a href="{{ cluster.url }}">{{ cluster.name }}</a>
-                                            <span class="fa fa-link"></span>
-                                            <span class="badge">{{ cluster.agent_count }}</span>
-                                            <p><small>{{ cluster.description }}</small></p>
+                                            Name: <a href="{{ cluster.url }}">{{ cluster.name }}</a><span class="fa fa-link"></span>
                                         </div>
-                                        <div class="forum-description">
-                                            <span class="text-danger">Running: {{ cluster.fromNow }} days ago</span>
+                                        <div class="forum-name">
+                                            Nodes: <span class="badge">{{ cluster.agent_count }}</span>
+                                        </div>
+                                        <div class="forum-name">
+                                            Description: {{ cluster.description }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2 forum-posts">
-                                <span class="text-danger">{{ cluster.createtime_format }}</span>
+                            <div class="col-sm-3 forum-posts">
+                                <div class="forum-description">
+                                    <small>Created: {{ cluster.createtime_format }}</small>
+                                </div>
+                                <div class="forum-description">
+                                    <small>Running: {{ cluster.fromNow }} days ago</small>
+                                </div>
                             </div>
                             <div class="col-sm-3 forum-status">
-                                {% if cluster.open_url %}
-                                    <a href="http://{{ cluster.open_url }}" target="_blank">{{ cluster.open_url }}</a>
-                                    <span class="fa fa-link"></span>
-                                {% else %}
-                                    <span class="text-danger">No Public.</span>
-                                {% endif %}
+                                <div class="forum-name">
+                                    {% if cluster.open_url %}
+                                        <a href="http://{{ cluster.open_url }}" target="_blank">{{ cluster.open_url }}</a>
+                                        <span class="fa fa-link"></span>
+                                    {% else %}
+                                        <small>No Public.</small>
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="col-sm-1 forum-posts">
-                                <a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster.id) }}">
-                                    <span class="badge"> {{ cluster.task_count }}</span>
-                                </a>
+                                <div class="forum-name">
+                                    Jobs: <a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster.id) }}"><span class="badge">{{ cluster.task_count }}</span></a>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
