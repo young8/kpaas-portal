@@ -66,11 +66,7 @@
                             {% if pod['pod_status'] == "Running" %}
                                 <span class="label label-success"> {{ pod['pod_status'] }}</span>
                             {% else %}
-                                <span class="label label-danger"> {{ pod['pod_status'] }}</span>
-                            {% endif %}
-
-                            {% if pod['pod_components'] > 0 %}
-                                <span class="label label-success"> HEALTHY</span>
+                                <span class="label label-warning"> {{ pod['pod_status'] }}</span>
                             {% endif %}
                         </div>
                         <div class="col-sm-3 topic-stats">
@@ -96,18 +92,10 @@
                                 </div><!-- end Modal -->
                         </div>
                         <div class="col-sm-2 topic-stats">
-                            <span class="text text-danger"> {{ pod['pod_node_ip'] }}</span>
+                            {{ pod['pod_node_ip'] }}
                         </div>
                         <div class="col-sm-3 topic-stats">
                             <span class="label label-primary"> {{ pod['pod_type'] }}</span>
-                            {% if pod['pod_components'] > 0 %}
-                                <span class="badge"> {{ pod['pod_components'] }}</span>
-                                {% if pod['pod_tags'] %}
-                                    {% for tag in pod['pod_tags'] %}
-                                        <span class="label label-success"> {{ tag }}</span>
-                                    {% endfor %}
-                                {% endif %}
-                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}

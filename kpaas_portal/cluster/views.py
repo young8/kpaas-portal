@@ -74,12 +74,14 @@ def create_cluster():
         server_service.save()
         # write into db: server pod
         server_pod = Pod('server', cluster_instance, current_user.namespace)
+        server_pod.status = 'pending'
         server_pod.save()
         # write into db: agent pod
         agent_number = int(cluster_instance.type)
         for i in range(1, agent_number + 1):
             name = 'agent{0}'.format(i)
             agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
+            agent_pod.status = 'pending'
             agent_pod.save()
         cluster_instance.status = 'creating'
         cluster_instance.save(current_user)
