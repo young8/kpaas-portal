@@ -10,6 +10,7 @@
 import json
 from datetime import datetime
 from flask import url_for, current_app
+from jinja2 import Environment, PackageLoader
 
 from kpaas_portal.extensions import db
 from kpaas_portal.utils.database import CRUDMixin
@@ -504,6 +505,7 @@ class Service(db.Model, CRUDMixin):
         self.cluster = cluster
         self.namespace = namespace
         self.name = '{0}-8080'.format(cluster.name)
+        self.backend = '{0}-server'.format(cluster.name)
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
@@ -534,3 +536,11 @@ class Service(db.Model, CRUDMixin):
             }
         }
         return json.dumps(schema)
+
+    @property
+    def get_server_json(self):
+        env = Environment(loader=PackageLoader('kpaas_portal', 'templates/k8s'))
+        template = env.get_template('server_service.tpl')
+        content = template.render(name=self.name, pod=self.backend)
+        current_app.logger.debug('server service json: "{}"'.format(json.loads(content)))
+        return json.loads(content)

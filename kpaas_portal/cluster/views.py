@@ -75,12 +75,12 @@ def create_cluster():
         # write into db: service
         server_service = Service('server', cluster_instance, current_user.namespace)
         server_service.save()
-        q.put({'service': server_service.name})
+        q.put({'id': int(server_service.id), 'type': 'service', 'data': server_service.get_server_json})
         # write into db: server pod
         server_pod = Pod('server', cluster_instance, current_user.namespace)
         server_pod.status = 'pending'
         server_pod.save()
-        q.put({'pod': server_pod.name})
+        q.put({'id': server_pod.id, 'type': 'pod', 'data': server_pod.name})
         # write into db: agent pod
         agent_number = int(cluster_instance.type)
         for i in range(1, agent_number + 1):
@@ -88,11 +88,23 @@ def create_cluster():
             agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
             agent_pod.status = 'pending'
             agent_pod.save()
-            q.put({'pod': agent_pod.name})
+            q.put({'id': agent_pod.id, 'type': 'pod', 'data': agent_pod.name})
         cluster_instance.status = 'creating'
         cluster_instance.save(current_user)
         while not q.empty():
-            current_app.logger.debug('jobs is: {}'.format(q.get()))
+            job = q.get()
+            current_app.logger.debug('job is: {}'.format(job))
+            id = job.get('id', 0)
+            type = job.get('type')
+            data = job.get('data')
+            if type == 'service':
+                s = Service.query.filter_by(id=id).first()
+                s.status = 'creating'
+                s.save()
+            if type == 'pod':
+                p = Pod.query.filter_by(id=id).first()
+                p.status = 'creating'
+                p.save()
         return redirect(url_for('cluster.index'))
 
         # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])
