@@ -99,9 +99,6 @@ def configure_blueprints(app):
     # 系统管理
     from kpaas_portal.manager.views import manager as manager_blueprint
     app.register_blueprint(manager_blueprint, url_prefix='/manager')
-    # REST API
-    from kpaas_portal.api_1_0.service import api as api_1_0_blueprint
-    app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
 
 
 def configure_extensions(app):
