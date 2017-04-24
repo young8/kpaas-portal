@@ -19,6 +19,8 @@ from kpaas_portal.utils.k8stools import K8sServiceClass
 from kpaas_portal.utils.consultools import ConsulServiceClass
 from kpaas_portal.utils.haproxytools import HaproxyServiceClass
 
+from kpaas_portal.api_1_1.models import KubeApiService
+
 manager = Blueprint('manager', __name__)
 
 
@@ -28,8 +30,20 @@ def k8s():
     """
     k8s 查询
     """
-    k8s_instance = K8sServiceClass(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'], namespace='default')
-    return render_template('manager/k8s.html', services=k8s_instance.services(), pods=k8s_instance.pods())
+    pods, services = [], []
+    current_app.logger.debug('GET /k8s')
+    k8s_instance = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+    pod_items = k8s_instance.get_pods('default')
+    if pod_items.get('items'):
+        for item in pod_items['items']:
+            current_app.logger.debug('pod is: name:{0}, status: {1}, ip: {2}, node: {3}'.format(item['metadata']['name'], item['status']['phase'], item['status']['podIP'], item['status']['hostIP']))
+            pods.append({'name': item['metadata']['name'], 'status': item['status']['phase'], 'ip': item['status']['podIP'], 'node': item['status']['hostIP']})
+    svr_items = k8s_instance.get_services('default')
+    if svr_items.get('items'):
+        for item in svr_items['items']:
+            current_app.logger.debug('service is: name:{0}, type: {1}, port: {2}, nodeport: {3}'.format(item['metadata']['name'], item['spec']['type'], item['spec']['ports'][0].get('targetPort', 0), item['spec']['ports'][0].get('nodePort', 0)))
+            services.append({'name': item['metadata']['name'], 'type': item['spec']['type'], 'port': item['spec']['ports'][0].get('targetPort', 0), 'nodeport': item['spec']['ports'][0].get('nodePort', 0)})
+    return render_template('manager/k8s.html', services=services, pods=pods)
 
 
 @manager.route("/consul")

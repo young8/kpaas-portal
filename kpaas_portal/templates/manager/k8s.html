@@ -24,10 +24,9 @@
                 <table class="table table-bordered" style="table-layout: fixed;word-wrap: break-word">
                     <thead style="background: #eaf1f5">
                         <tr>
-                            <th>Pod 状态</th>
                             <th>Pod 名称</th>
+                            <th>Pod 状态</th>
                             <th>Pod IP</th>
-                            <th>Node 名称</th>
                             <th>Node IP</th>
                         </tr>
                     </thead>
@@ -35,17 +34,16 @@
                         {% if pods %}
                             {% for pod in pods %}
                                 <tr>
+                                    <td>{{ pod['name'] }}</td>
                                     <td>
-                                        {% if pod["pod_status"] == "Running" %}
-                                            <span class="label label-success">{{ pod['pod_name'] }}</span>
+                                        {% if pod["status"] == "Running" %}
+                                            <span class="label label-success">{{ pod['status'] }}</span>
                                         {% else %}
-                                            <span class="label label-danger">{{ pod['pod_name'] }}</span>
+                                            <span class="label label-danger">{{ pod['status'] }}</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ pod['pod_name'] }}</td>
-                                    <td>{{ pod['pod_ip'] }}</td>
-                                    <td>{{ pod['pod_node'] }}</td>
-                                    <td>{{ pod['pod_node_ip'] }}</td>
+                                    <td>{{ pod['ip'] }}</td>
+                                    <td>{{ pod['node'] }}</td>
                                 </tr>
                             {% endfor %}
                         {% endif %}
@@ -66,7 +64,7 @@
                     <thead>
                     <tr>
                         <th>Service 名称</th>
-                        <th>Pod IP</th>
+                        <th>Service 类型</th>
                         <th>Pod Port</th>
                         <th>Node Port</th>
                     </tr>
@@ -75,10 +73,16 @@
                         {% if services %}
                             {% for service in services %}
                                 <tr>
-                                    <td><span class="label label-primary">{{ service['service_name'] }}</span></td>
-                                    <td>{{ service['service_ip'] }}</td>
-                                    <td>{{ service['service_sport'] }}</td>
-                                    <td>{{ service['service_dport'] }}</td>
+                                    <td>{{ service['name'] }}</td>
+                                    <td>
+                                        {% if service['type'] == "NodePort" %}
+                                            <span class="label label-success">{{ service['type'] }}</span>
+                                        {% else %}
+                                            <span class="label label-default">{{ service['type'] }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ service['port'] }}</td>
+                                    <td>{{ service['nodeport'] }}</td>
                                 </tr>
                         {% endfor %}
                     {% endif %}
