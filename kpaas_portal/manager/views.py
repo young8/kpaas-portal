@@ -44,17 +44,6 @@ def k8s():
     return render_template('manager/k8s.html', services=services, pods=pods)
 
 
-@manager.route('/users')
-@cache.cached(timeout=60)
-def users():
-    """
-    用户
-    """
-    users = User.query.order_by(User.register_time).all()
-
-    return render_template("manager/user.html", users=users)
-
-
 @manager.route('/haproxy')
 # @cache.cached(timeout=60)
 def haproxy():
