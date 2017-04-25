@@ -8,6 +8,7 @@
     
 """
 
+import json
 import requests
 
 from flask import current_app
@@ -21,8 +22,19 @@ class KubeApiService():
         self.base_url = 'http://{0}:{1}'.format(self.host, self.port)
         current_app.logger.debug('kube api server url is: {}'.format(self.base_url))
 
-    def create_service(self):
-        pass
+    def create_service(self, namespace, data):
+        try:
+            headers = {'content-type': 'application/json'}
+            url = '{0}/api/v1/namespaces/{1}/services'.format(self.base_url, namespace)
+            if not isinstance(data, dict):
+                return {}
+            res = requests.post(url, json=data, headers=headers)
+            current_app.logger.debug('create service: {0} , status code: {1}'.format(res.text, res.status_code))
+            if res.status_code == 201:
+                return {}
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def create_statefulset(self):
         pass
@@ -69,11 +81,30 @@ class KubeApiService():
 
     def create_pod(self, namespace, data):
         try:
-            headers = {'content-type': 'application/json', "Accept": "application/json"}
+            headers = {'content-type': 'application/json'}
             url = '{0}/api/v1/namespaces/{1}/pods'.format(self.base_url, namespace)
             res = requests.post(url, json=data, headers=headers)
             if res.status_code == 201:
                 current_app.logger.debug('create pod: {0} , status code: {1}'.format(res.text, res.status_code))
+                return {}
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
+
+    def create_namespace(self, namespace):
+        try:
+            headers = {'content-type': 'application/json'}
+            url = '{0}/api/v1/namespaces'.format(self.base_url)
+            data = {
+                "apiVersion": "v1",
+                "kind": "Namespace",
+                "metadata": {
+                    "name": namespace
+                }
+            }
+            res = requests.post(url, json=data, headers=headers)
+            current_app.logger.debug('create namespace: {0} , status code: {1}'.format(res.text, res.status_code))
+            if res.status_code == 201:
                 return {}
         except requests.ConnectionError as e:
             raise KubeApiError(description='kube api server connect error: {}'.format(e.message))

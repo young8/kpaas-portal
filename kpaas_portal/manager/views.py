@@ -31,12 +31,12 @@ def k8s():
     pods, services = [], []
     current_app.logger.debug('GET /k8s')
     k8s_instance = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
-    pod_items = k8s_instance.get_pods('default')
+    pod_items = k8s_instance.get_pods(current_user.namespace)
     if pod_items.get('items'):
         for item in pod_items['items']:
             current_app.logger.debug('pod is: name:{0}, status: {1}, ip: {2}, node: {3}'.format(item['metadata']['name'], item['status']['phase'], item['status']['podIP'], item['status']['hostIP']))
             pods.append({'name': item['metadata']['name'], 'status': item['status']['phase'], 'ip': item['status']['podIP'], 'node': item['status']['hostIP']})
-    svr_items = k8s_instance.get_services('default')
+    svr_items = k8s_instance.get_services(current_user.namespace)
     if svr_items.get('items'):
         for item in svr_items['items']:
             current_app.logger.debug('service is: name:{0}, type: {1}, port: {2}, nodeport: {3}'.format(item['metadata']['name'], item['spec']['type'], item['spec']['ports'][0].get('targetPort', 0), item['spec']['ports'][0].get('nodePort', 0)))
