@@ -13,7 +13,6 @@ import json
 from flask import current_app
 
 from kpaas_portal.extensions import celery
-from kpaas_portal.utils.consultools import ConsulServiceClass
 from kpaas_portal.utils.ambaritools import AmbariServiceClass
 from kpaas_portal.cluster.models import Pod, Service, Cluster
 from kpaas_portal.user.models import User
@@ -208,11 +207,6 @@ def celery_cluster_create(self, k8s_namespace, pod_id, service_id=None):
     pod_instance.nip = info['status'].get('hostIP')
     pod_instance.save()
     print '---> [k8s] create pod_id: {0}, pod_name: {1}.'.format(pod_instance.id, pod_instance.name)
-
-    # 注册 DNS
-    consul_instance = ConsulServiceClass(current_app.config['CONSUL_SERVICE_ADDR'], current_app.config['CONSUL_SERVICE_PORT'])
-    consul_instance.node_register(pod_instance.to_consul_node_json())
-    print '---> [consul] node register pod: {0}, ip: {1}'.format(pod_instance.name, pod_instance.sip)
 
     # 把 Ambari 注册为 Service 发布出去
     if service_id and pod_instance.type == 'server':

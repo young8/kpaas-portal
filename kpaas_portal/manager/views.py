@@ -15,7 +15,6 @@ from kpaas_portal.extensions import cache
 from kpaas_portal.cluster.models import Service
 from kpaas_portal.user.models import User
 from kpaas_portal.utils.cephtools import CephClass
-from kpaas_portal.utils.consultools import ConsulServiceClass
 from kpaas_portal.utils.haproxytools import HaproxyServiceClass
 
 from kpaas_portal.api_1_1.models import KubeApiService

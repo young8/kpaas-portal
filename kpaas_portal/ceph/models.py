@@ -15,7 +15,6 @@ from flask_login import current_user
 from kpaas_portal.extensions import db
 from kpaas_portal.utils.database import CRUDMixin
 from kpaas_portal.utils.cephtools import CephClass
-from kpaas_portal.utils.consultools import ConsulServiceClass
 
 
 class Bucket(db.Model, CRUDMixin):
@@ -43,19 +42,6 @@ class Bucket(db.Model, CRUDMixin):
     @property
     def bucket_ip(self):
         return current_app.config['CEPH_SERVICE_IP']
-
-    def register_dns(self):
-        dns = ConsulServiceClass()
-        schema = {
-            'Node': self.bucket_shortname,
-            'Address': self.bucket_ip,
-            'Service': {
-                'Service': self.bucket_fullname,
-                'Tags': ['bucket'],
-                'Port': 80
-            }
-        }
-        dns.node_register(json.dumps(schema))
 
     @property
     def objects_count(self):
