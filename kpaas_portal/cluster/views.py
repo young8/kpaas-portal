@@ -107,6 +107,7 @@ def create_cluster():
                 s = Service.query.filter_by(id=id).first()
                 s.status = 'creating'
                 s.save()
+                k.create_service(namespace=s.namespace, data=data)
             if type == 'pod':
                 p = Pod.query.filter_by(id=id).first()
                 p.status = 'creating'
