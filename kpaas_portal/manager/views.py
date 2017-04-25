@@ -45,29 +45,6 @@ def k8s():
     return render_template('manager/k8s.html', services=services, pods=pods)
 
 
-@manager.route("/consul")
-# @cache.cached(timeout=60)
-def consul():
-    """
-    Consul 服务接口
-    节点: cluster
-    服务: amb-consul
-    ceph object: s3.rgw.ceph
-    """
-    consul_instance = ConsulServiceClass(host=current_app.config['CONSUL_SERVICE_ADDR'], port=current_app.config['CONSUL_SERVICE_PORT'])
-    consul_nodes = consul_instance.nodes()
-    _nodes = []
-    if consul_nodes:
-        for node in consul_nodes:
-            n = str(node.get('Node'))
-            if not n:
-                break
-            if n.startswith('cluster'):
-                _nodes.append(node)
-
-    return render_template("manager/consul.html", nodes=_nodes)
-
-
 @manager.route('/users')
 @cache.cached(timeout=60)
 def users():
