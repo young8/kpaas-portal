@@ -87,6 +87,7 @@ class AmbariServerParse():
     def parse(self):
         schema = ''
 
+
 class AmbariApiService():
     def __init__(self):
         pass

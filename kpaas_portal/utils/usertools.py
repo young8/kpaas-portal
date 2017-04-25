@@ -16,7 +16,11 @@ def create_admin_user(username, password):
     user.password = password
     user.activated = True
     user.is_admin = True
-    user.namespace = 'default'
+    if isinstance(username, str):
+        t = username.split(' ')
+        user.namespace = ''.join(t)
+    else:
+        user.namespace = 'default'
     user.save()
 
     return user

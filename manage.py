@@ -41,26 +41,30 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 
 @manager.command
 def initdb():
-    """Creates the database."""
+    """
+    Creates the database.
+    """
     migrate()
     upgrade()
 
 
 @manager.command
 def dropdb():
-    """Deletes the database."""
+    """
+    Deletes the database.
+    """
     db.drop_all()
 
 
 @manager.option('-u', '--username', dest='username')
 @manager.option('-p', '--password', dest='password')
 def create_admin(username=None, password=None):
-    """Creates the admin user."""
-
+    """
+    Creates the admin user.
+    """
     if not (username and password):
         username = prompt("Username")
         password = prompt_pass("Password")
-
     create_admin_user(username=username, password=password)
 
 
