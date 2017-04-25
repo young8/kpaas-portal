@@ -20,6 +20,8 @@ from kpaas_portal.utils.ambaritools import AmbariServiceClass
 from kpaas_portal.utils.k8stools import celery_node_delete, celery_cluster_create, celery_cluster_deploy
 from kpaas_portal.utils.haproxytools import HaproxyServiceClass
 
+from kpaas_portal.api_1_1.models import KubeApiService
+
 cluster = Blueprint('cluster', __name__)
 mylogger = logging.getLogger('app')
 
@@ -97,6 +99,9 @@ def create_cluster():
             id = job.get('id', 0)
             type = job.get('type')
             data = job.get('data')
+            current_app.logger.debug('post data: {}'.format(data))
+            k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+            k.create_pod('default', data)
             if type == 'service':
                 s = Service.query.filter_by(id=id).first()
                 s.status = 'creating'

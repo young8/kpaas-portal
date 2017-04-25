@@ -67,6 +67,25 @@ class KubeApiService():
     def get_pod(self):
         pass
 
+    def create_pod(self, namespace, data):
+        try:
+            headers = {'content-type': 'application/json', "Accept": "application/json"}
+            url = '{0}/api/v1/namespaces/{1}/pods'.format(self.base_url, namespace)
+            res = requests.post(url, json=data, headers=headers)
+            if res.status_code == 201:
+                current_app.logger.debug('create pod: {0} , status code: {1}'.format(res.text, res.status_code))
+                return {}
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
+
+
+class AmbariServerParse():
+    def __init__(self, name):
+        self.name = name
+
+    def parse(self):
+        schema = ''
 
 class AmbariApiService():
     def __init__(self):
