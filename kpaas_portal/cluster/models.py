@@ -55,9 +55,9 @@ class Cluster(db.Model, CRUDMixin):
 
     @property
     def open_url(self):
-        svr = self.services.filter_by(cluster_id=self.id, type='server').first()
-        if svr and svr.dip and svr.dport:
-            return '{0}:{1}'.format(svr.dip, (svr.dport + 21))
+        svr = self.services.filter_by(cluster_id=self.id).first()
+        if svr and svr.dport:
+            return 'http://{0}:{1}'.format(current_app.config['PUBLIC_IP'], svr.dport)
         return None
 
     @property
@@ -486,61 +486,32 @@ class Service(db.Model, CRUDMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), index=True)
     namespace = db.Column(db.String(50))
-    selector_pod = db.Column(db.String(200))
-    sip = db.Column(db.String(50))
-    sport = db.Column(db.Integer)
-    nip = db.Column(db.String(50))
-    nport = db.Column(db.Integer)
-    dip = db.Column(db.String(50))
-    dport = db.Column(db.Integer)
-    type = db.Column(db.String(20))
-    eid = db.Column(db.Integer)
+    sport = db.Column(db.Integer, default=0)
+    nport = db.Column(db.Integer, default=0)
+    dport = db.Column(db.Integer, default=0)
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
 
-    def __init__(self, type, cluster, namespace):
-        self.type = type
-        self.cluster = cluster
+    def __init__(self, namespace, cluster):
         self.namespace = namespace
         self.name = '{0}-8080'.format(cluster.name)
-        self.backend = '{0}-server'.format(cluster.name)
+        self.sport = 8080
+        self.cluster_id = cluster.id
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
-
-    # Methods
-    def to_server_json(self):
-        schema = {
-            'apiVersion': 'v1',
-            'kind': 'Service',
-            'metadata': {
-                'labels': {
-                    'name': self.name
-                },
-                'name': self.name
-            },
-            'spec': {
-                'ports': [
-                    {
-                        'protocol': 'TCP',
-                        'port': self.sport,
-                        'targetPort': self.sport
-                    }
-                ],
-                'selector': {
-                    'name': self.selector_pod
-                },
-                'type': 'LoadBalancer'
-            }
-        }
-        return json.dumps(schema)
 
     @property
     def get_server_json(self):
         env = Environment(loader=PackageLoader('kpaas_portal', 'templates/k8s'))
         template = env.get_template('server_service.tpl')
-        content = template.render(name=self.name, pod=self.backend)
+        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster.name, name=self.name)
         current_app.logger.debug('server service json: "{}"'.format(json.loads(content)))
         return json.loads(content)
+
+    def save(self):
+        self.createtime = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()

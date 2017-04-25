@@ -1,23 +1,31 @@
 {
-    "apiVersion": "v1",
-    "kind": "Service",
-    "metadata": {
-        "labels": {
-            "name": "{{ name }}"
-        },
-        "name": "{{ name }}"
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "{{ name }}",
+    "namespace": "{{ namespace }}"
+  },
+  "spec": {
+    "ports": [
+      {
+        "port": 8080,
+        "name": "ui"
+      },
+      {
+        "port": 8440,
+        "name": "tran"
+      },
+      {
+        "port": 8441,
+        "name": "tran2"
+      }
+    ],
+    "selector": {
+      "owner": "{{ owner }}",
+      "cluster": "{{ cluster }}",
+      "app": "ambari",
+      "role": "server"
     },
-    "spec": {
-        "ports": [
-            {
-                "protocol": "TCP",
-                "port": 8080,
-                "targetPort": 8080
-            }
-        ],
-        "selector": {
-            "name": "{{ pod }}"
-        },
-        "type": "LoadBalancer"
-    }
+    "type": "NodePort"
+  }
 }

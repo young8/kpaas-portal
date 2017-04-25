@@ -35,4 +35,4 @@ class DevelopmentConfig(DefaultConfig):
     # Haproxy
     HAPROXY_SERVICE = 'http://127.0.0.1:5000'
     # Public
-    PUBLIC_IP = '127.0.0.1'
+    PUBLIC_IP = '42.123.106.18'

@@ -67,15 +67,16 @@ def create_cluster():
         current_app.logger.debug('create cluster: description is {0}, type is {1}, machine is {2}'.format(form.cluster_description.data,
                                                                                                           form.cluster_type.data,
                                                                                                           form.cluster_machine.data))
-        q = Queue.Queue()
         # write into db: cluster
         cluster_instance = Cluster(form.cluster_description.data, form.cluster_type.data, form.cluster_machine.data)
         cluster_instance.save(current_user)
         cluster_instance.name = 'cluster{0}'.format(cluster_instance.id)
         cluster_instance.status = 'pending'
         cluster_instance.save(current_user)
+        # jobs queue
+        q = Queue.Queue()
         # write into db: service
-        server_service = Service('server', cluster_instance, current_user.namespace)
+        server_service = Service(current_user.namespace, cluster_instance)
         server_service.save()
         q.put({'id': int(server_service.id), 'type': 'service', 'data': server_service.get_server_json})
         # write into db: server pod
