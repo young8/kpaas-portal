@@ -132,19 +132,14 @@ def view_cluster(cluster_id):
     if (not service) or (service.nport is None):
         flash(u'警告！当前 Hadoop 集群没有注册服务成功，这样会影响集群的正常使用，请检查或联系管理员！', 'warning')
 
-    ambari_server = cluster_instance.pods.filter_by(type='server').first()
-    ambari_instance = AmbariServiceClass(ambari_server.sip)
+    statefulsets = StatefulSet.query.filter_by(cluster_id=cluster_id).all()
+    _statefulsets = []
+    for ss in statefulsets:
+        current_app.logger.debug('clusterid is: {0}, namespace is: {1}, statefulset is: {2}'.format(cluster_id, ss.namespace, ss.name))
+        k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+        res = k.view_statefulset(ss.namespace, ss.name)
 
-    _pods = []
-    pods = cluster_instance.pods.order_by(Pod.type.desc()).all()
-    for pod in pods:
-        if cluster_instance.cluster_deployment and pod.type == 'agent' and pod.components is None:
-            components = ambari_instance.host_components(cluster_instance.name, pod.name)
-            pod.components = ','.join(components)
-            pod.save()
-        _pods.append(pod.pod_summary())
-
-    return render_template('cluster/cluster.html', cluster=cluster_instance, pods=_pods)
+    return render_template('cluster/cluster.html', cluster=cluster_instance, pods=[])
 
 
 @cluster.route('/<cluster_id>/delete', methods=['GET', 'POST'])

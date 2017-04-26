@@ -59,8 +59,16 @@ class KubeApiService():
     def view_service(self):
         pass
 
-    def view_statefulset(self):
-        pass
+    def view_statefulset(self, namespace, name):
+        try:
+            url = '{0}/apis/apps/v1beta1/namespaces/{1}/statefulsets/{2}'.format(self.base_url, namespace, name)
+            res = requests.get(url)
+            if res.status_code == 200:
+                current_app.logger.debug('statefulset is: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def get_services(self, namespace):
         try:

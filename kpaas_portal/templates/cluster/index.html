@@ -15,58 +15,66 @@
 
             <div class="panel-body category-body">
                 <div class="category-meta">
-                    <div class="col-sm-6 forum-name">集群信息</div>
-                    <div class="col-sm-2 forum-stats">运行记录</div>
-                    <div class="col-sm-3 forum-stats">对外服务</div>
-                    <div class="col-sm-1 forum-last-post">任务数</div>
+                    <div class="col-sm-12 forum-name">集群信息</div>
                 </div>
                 {% if clusters %}
                     {% for cluster in clusters %}
                         <div class="row category-row hover">
-                            <div class="col-sm-5 forum-info">
-                                <div class="row">
-                                    <!-- Icon -->
-                                    <div class="col-sm-2">
-                                        {% if cluster.status == 'succeed' %}
-                                            <span class="label label-success">{{ cluster.status }}</span>
-                                        {% else %}
-                                            <span class="label label-warning">{{ cluster.status }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-sm-10">
-                                        <div class="forum-name">
-                                            Name: <a href="{{ cluster.url }}">{{ cluster.name }}</a><span class="fa fa-link"></span>
-                                        </div>
-                                        <div class="forum-name">
-                                            Nodes: <span class="badge">{{ cluster.agent_count }}</span>
-                                        </div>
-                                        <div class="forum-name">
-                                            Description: {{ cluster.description }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 forum-posts">
-                                <div class="forum-description">
-                                    <small>Created: {{ cluster.createtime_format }}</small>
-                                </div>
-                                <div class="forum-description">
-                                    <small>Running: {{ cluster.fromNow }} days ago</small>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 forum-status">
+                            <div class="col-sm-12 forum-info">
                                 <div class="forum-name">
-                                    {% if cluster.open_url %}
-                                        <a href="http://{{ cluster.open_url }}" target="_blank">{{ cluster.open_url }}</a>
-                                        <span class="fa fa-link"></span>
+                                    Name: {{ cluster.name }}
+                                </div>
+                                <div class="forum-name">
+                                    {% if cluster.status == 'succeed' %}
+                                        Status: <span class="label label-success">{{ cluster.status }}</span>
                                     {% else %}
-                                        <small>No Public.</small>
+                                        Status: <span class="label label-warning">{{ cluster.status }}</span>
                                     {% endif %}
                                 </div>
-                            </div>
-                            <div class="col-sm-1 forum-posts">
+                                <div class="forum-name">
+                                    Nodes: <span class="badge">{{ cluster.agent_count }}</span>
+                                </div>
+                                <div class="forum-name">
+                                    Description: {{ cluster.description }}
+                                </div>
+                                <div class="forum-name">
+                                    Created: {{ cluster.createtime_format }}
+                                </div>
+                                <div class="forum-name">
+                                    Running: {{ cluster.fromNow }} days ago
+                                </div>
+                                <div class="forum-name">
+                                    {% if cluster.open_url %}
+                                        Internet: <a href="http://{{ cluster.open_url }}" target="_blank">{{ cluster.open_url }}</a>
+                                        <span class="fa fa-link"></span>
+                                    {% else %}
+                                        Internet: Null
+                                    {% endif %}
+                                </div>
                                 <div class="forum-name">
                                     Jobs: <a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster.id) }}"><span class="badge">{{ cluster.task_count }}</span></a>
+                                </div>
+                                <div class="pull-left">
+                                    <div class="btn-group btn-group-sm navbar-btn">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">集群操作 <span class="caret"></span></button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="{{ url_for('cluster.deploy_cluster', cluster_id=cluster.id) }}">集群部署</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="{{ url_for('cluster.open_cluster', cluster_id=cluster.id) }}">集群映射到外网</a></li>
+                                            <li><a href="{{ url_for('cluster.close_cluster', cluster_id=cluster.id) }}">集群关闭映射到外网</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="{{ url_for('cluster.delete_cluster', cluster_id=cluster.id) }}">集群删除</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group btn-group-sm navbar-btn">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">工具集 <span class="caret"></span></button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="{{ url_for('tools.mr_view_cluster', cluster_id=cluster.id) }}">查看 MR 任务列表</a></li>
+                                            <li><a href="{{ url_for('tools.mr_new_task', cluster_id=cluster.id) }}">新建 MR 任务</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="{{ url_for('tools.hive_view_cluster', cluster_id=cluster.id, db_name='default') }}">查看 Hive 数据表</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
