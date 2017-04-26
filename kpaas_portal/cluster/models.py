@@ -527,23 +527,31 @@ class StatefulSet(db.Model, CRUDMixin):
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
 
-    def __init__(self, namespace, cluster):
+    def __init__(self, namespace, cluster, name, type, replicas=0):
         self.namespace = namespace
+        self.name = name
+        if type == 'ambari-agent':
+            self.replicas = replicas
+        else:
+            self.replicas = 1
         self.cluster_id = cluster.id
         self.cluster_name = cluster.name
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
 
-    @property
-    def get_server_json(self):
-        self.name = '{}-server'.format(self.cluster_name)
-        self.replicas = 1
-        self.save()
+    def parse(self, type):
+        ambariserver = ''
+        if type == 'ambari-server':
+            tpl = 'server_statefulset.tpl'
+        else:
+            tpl = 'agent_statefulset.tpl'
+            ambariserver = '{0}-server-0.node.{1}'.format(self.cluster_name, self.namespace)
+
         env = Environment(loader=PackageLoader('kpaas_portal', 'templates/k8s'))
-        template = env.get_template('server_statefulset.tpl')
-        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster_name, name=self.name, replicas=self.replicas)
-        current_app.logger.debug('server statefulset json: "{}"'.format(json.loads(content)))
+        template = env.get_template(tpl)
+        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster_name, name=self.name, replicas=self.replicas, ambariserver=ambariserver)
+        current_app.logger.debug('{0} post data is: "{1}"'.format(type, json.loads(content)))
         return json.loads(content)
 
     def save(self):

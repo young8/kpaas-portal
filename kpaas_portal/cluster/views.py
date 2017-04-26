@@ -80,20 +80,15 @@ def create_cluster():
         server_service.save()
         q.put({'id': int(server_service.id), 'type': 'service', 'data': server_service.get_server_json})
         # write into db: server statefulset
-        server_statefulset = StatefulSet(current_user.namespace, cluster_instance)
+        server_statefulset = StatefulSet(current_user.namespace, cluster_instance, '{}-server'.format(cluster_instance.name), 'ambari-server', replicas=1)
         server_statefulset.status = 'pending'
         server_statefulset.save()
-        q.put({'id': server_statefulset.id, 'type': 'statefulset', 'data': server_statefulset.get_server_json})
-        # write into db: agent pod
-        # agent_number = int(cluster_instance.type)
-        # for i in range(1, agent_number + 1):
-        #     name = 'agent{0}'.format(i)
-        #     agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
-        #     agent_pod.status = 'pending'
-        #     agent_pod.save()
-        #     q.put({'id': agent_pod.id, 'type': 'statefulset', 'data': agent_pod.name})
-        # cluster_instance.status = 'creating'
-        # cluster_instance.save(current_user)
+        q.put({'id': server_statefulset.id, 'type': 'statefulset', 'data': server_statefulset.parse('ambari-server')})
+        # write into db: agent statefulset
+        agent_statefulset = StatefulSet(current_user.namespace, cluster_instance, '{}-agent'.format(cluster_instance.name), 'ambari-agent', replicas=3)
+        agent_statefulset.status = 'pending'
+        agent_statefulset.save()
+        q.put({'id': agent_statefulset.id, 'type': 'statefulset', 'data': agent_statefulset.parse('ambari-agent')})
         while not q.empty():
             job = q.get()
             current_app.logger.debug('job is: {}'.format(job))
