@@ -36,8 +36,19 @@ class KubeApiService():
             raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
             return {}
 
-    def create_statefulset(self):
-        pass
+    def create_statefulset(self, namespace, data):
+        try:
+            headers = {'content-type': 'application/json'}
+            url = '{0}/apis/apps/v1beta1/namespaces/{1}/statefulsets'.format(self.base_url, namespace)
+            if not isinstance(data, dict):
+                return {}
+            res = requests.post(url, json=data, headers=headers)
+            current_app.logger.debug('create statefulset: {0} , status code: {1}'.format(res.text, res.status_code))
+            if res.status_code == 201:
+                return {}
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def delete_service(self):
         pass

@@ -111,6 +111,7 @@ def create_cluster():
                 ss = StatefulSet.query.get(id)
                 ss.status = 'creating'
                 ss.save()
+                k.create_statefulset(namespace=s.namespace, data=data)
         return redirect(url_for('cluster.index'))
 
         # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])
