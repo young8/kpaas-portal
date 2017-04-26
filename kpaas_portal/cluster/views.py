@@ -13,7 +13,7 @@ from flask import (Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 from .forms import ClusterCreateForm, ClusterDeployForm, ClusterDeleteForm
-from .models import Cluster, Pod, Service
+from .models import Cluster, Pod, Service, StatefulSet
 
 from kpaas_portal.extensions import cache
 from kpaas_portal.utils.ambaritools import AmbariServiceClass
@@ -79,21 +79,21 @@ def create_cluster():
         server_service = Service(current_user.namespace, cluster_instance)
         server_service.save()
         q.put({'id': int(server_service.id), 'type': 'service', 'data': server_service.get_server_json})
-        # write into db: server pod
-        server_pod = Pod('server', cluster_instance, current_user.namespace)
-        server_pod.status = 'pending'
-        server_pod.save()
-        q.put({'id': server_pod.id, 'type': 'pod', 'data': server_pod.name})
+        # write into db: server statefulset
+        server_statefulset = StatefulSet(current_user.namespace, cluster_instance)
+        server_statefulset.status = 'pending'
+        server_statefulset.save()
+        q.put({'id': server_statefulset.id, 'type': 'statefulset', 'data': server_statefulset.get_server_json})
         # write into db: agent pod
-        agent_number = int(cluster_instance.type)
-        for i in range(1, agent_number + 1):
-            name = 'agent{0}'.format(i)
-            agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
-            agent_pod.status = 'pending'
-            agent_pod.save()
-            q.put({'id': agent_pod.id, 'type': 'pod', 'data': agent_pod.name})
-        cluster_instance.status = 'creating'
-        cluster_instance.save(current_user)
+        # agent_number = int(cluster_instance.type)
+        # for i in range(1, agent_number + 1):
+        #     name = 'agent{0}'.format(i)
+        #     agent_pod = Pod('agent', cluster_instance, current_user.namespace, name)
+        #     agent_pod.status = 'pending'
+        #     agent_pod.save()
+        #     q.put({'id': agent_pod.id, 'type': 'statefulset', 'data': agent_pod.name})
+        # cluster_instance.status = 'creating'
+        # cluster_instance.save(current_user)
         while not q.empty():
             job = q.get()
             current_app.logger.debug('job is: {}'.format(job))
@@ -102,16 +102,15 @@ def create_cluster():
             data = job.get('data')
             current_app.logger.debug('post data: {}'.format(data))
             k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
-            k.create_pod('default', data)
-            if type == 'service':
-                s = Service.query.filter_by(id=id).first()
+            if type == 'service' and id and isinstance(data, dict):
+                s = Service.query.get(id)
                 s.status = 'creating'
                 s.save()
                 k.create_service(namespace=s.namespace, data=data)
-            if type == 'pod':
-                p = Pod.query.filter_by(id=id).first()
-                p.status = 'creating'
-                p.save()
+            if type == 'statefulset' and id and isinstance(data, dict):
+                ss = StatefulSet.query.get(id)
+                ss.status = 'creating'
+                ss.save()
         return redirect(url_for('cluster.index'))
 
         # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])

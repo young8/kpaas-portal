@@ -21,7 +21,6 @@ class Cluster(db.Model, CRUDMixin):
     Cluster
     """
     __tablename__ = 'cluster'
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     description = db.Column(db.String(255))
@@ -31,13 +30,11 @@ class Cluster(db.Model, CRUDMixin):
     cluster_deployment = db.Column(db.SmallInteger, default=0)
     agents_deployment = db.Column(db.SmallInteger, default=0)
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # One-to-many
-    pods = db.relationship('Pod', backref='cluster', lazy='dynamic', cascade='all, delete-orphan')
+    # Relationship One-to-many
     services = db.relationship('Service', backref='cluster', lazy='dynamic', cascade='all, delete-orphan')
+    statefulsets = db.relationship('StatefulSet', backref='cluster', lazy='dynamic', cascade='all, delete-orphan')
     tasks = db.relationship('Task', backref='cluster', lazy='dynamic', cascade='all, delete-orphan')
     hivetables = db.relationship('HiveTable', backref='cluster', lazy='dynamic', cascade='all, delete-orphan')
-
     # Foreign Key
     owner = db.Column(db.Integer, db.ForeignKey('user.id'))
 
@@ -482,7 +479,6 @@ class Service(db.Model, CRUDMixin):
     Service
     """
     __tablename__ = 'service'
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), index=True)
     namespace = db.Column(db.String(50))
@@ -490,7 +486,6 @@ class Service(db.Model, CRUDMixin):
     nport = db.Column(db.Integer, default=0)
     dport = db.Column(db.Integer, default=0)
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
-
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
 
@@ -499,6 +494,8 @@ class Service(db.Model, CRUDMixin):
         self.name = '{0}-8080'.format(cluster.name)
         self.sport = 8080
         self.cluster_id = cluster.id
+        self.cluster_name = cluster.name
+        self.createtime = datetime.utcnow()
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self.id)
@@ -507,11 +504,48 @@ class Service(db.Model, CRUDMixin):
     def get_server_json(self):
         env = Environment(loader=PackageLoader('kpaas_portal', 'templates/k8s'))
         template = env.get_template('server_service.tpl')
-        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster.name, name=self.name)
+        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster_name, name=self.name)
         current_app.logger.debug('server service json: "{}"'.format(json.loads(content)))
         return json.loads(content)
 
     def save(self):
-        self.createtime = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
+
+class StatefulSet(db.Model, CRUDMixin):
+    """
+    StatefulSet
+    """
+    __tablename__ = 'k8s_statefulset'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), index=True)
+    namespace = db.Column(db.String(50), default='default')
+    replicas = db.Column(db.Integer, default=1)
+    createtime = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50))
+    # Foreign Key
+    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))
+
+    def __init__(self, namespace, cluster):
+        self.namespace = namespace
+        self.cluster_id = cluster.id
+        self.cluster_name = cluster.name
+
+    def __repr__(self):
+        return '<{} {}>'.format(self.__class__.__name__, self.id)
+
+    @property
+    def get_server_json(self):
+        self.name = '{}-server'.format(self.cluster_name)
+        self.replicas = 1
+        self.save()
+        env = Environment(loader=PackageLoader('kpaas_portal', 'templates/k8s'))
+        template = env.get_template('server_statefulset.tpl')
+        content = template.render(namespace=self.namespace, owner=self.namespace, cluster=self.cluster_name, name=self.name, replicas=self.replicas)
+        current_app.logger.debug('server statefulset json: "{}"'.format(json.loads(content)))
+        return json.loads(content)
+
+    def save(self):
         db.session.add(self)
         db.session.commit()
