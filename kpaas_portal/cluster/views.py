@@ -47,21 +47,12 @@ def index():
 @login_required
 def create_cluster():
     """
-    创建一个新集群
+    创建集群
     """
-
-    # ceph_key = current_user.ceph_keys
-    # ceph_key = ceph_key.split(' ')
-    # ceph_host = '{0}.{1}'.format(current_app.config['CEPH_SERVICE_HOSTNAME'], current_app.config['CEPH_SERVICE_DOMAIN'])
-    # ceph_info = (ceph_key[1], ceph_key[2], ceph_host)
-    # print ceph_info
-
     if not current_app.config['CEPH_CLOSED'] and not current_user.ceph_keys:
         flash(u'失败！当前用户没有配置 Ceph S3 Key，请配置账户信息。', 'danger')
         return redirect(current_user.url)
-
     form = ClusterCreateForm()
-
     if request.method == 'POST':
         # 初始化一个集群信息
         current_app.logger.debug('create cluster: description is {0}, type is {1}, machine is {2}'.format(form.cluster_description.data,
@@ -98,24 +89,18 @@ def create_cluster():
             current_app.logger.debug('post data: {}'.format(data))
             k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
             if type == 'service' and id and isinstance(data, dict):
+                k.create_service(namespace=current_user.namespace, data=data)
                 s = Service.query.get(id)
-                s.status = 'creating'
+                s.status = 'created'
                 s.save()
-                k.create_service(namespace=s.namespace, data=data)
             if type == 'statefulset' and id and isinstance(data, dict):
+                k.create_statefulset(namespace=current_user.namespace, data=data)
                 ss = StatefulSet.query.get(id)
-                ss.status = 'creating'
+                ss.status = 'created'
                 ss.save()
-                k.create_statefulset(namespace=s.namespace, data=data)
+            cluster_instance.status = 'created'
+            cluster_instance.save()
         return redirect(url_for('cluster.index'))
-
-        # celery_cluster_create.apply_async(args=['default', server_pod.id, server_service.id])
-        #
-        # # 2、创建 hive mysql
-        # hive_mysql_pod = Pod('hivedb', cluster_instance)
-        # hive_mysql_pod.save()
-        # celery_cluster_create.apply_async(args=['default', hive_mysql_pod.id])
-
     return render_template('cluster/cluster_create.html', form=form)
 
 
