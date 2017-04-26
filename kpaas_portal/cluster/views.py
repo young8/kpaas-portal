@@ -147,26 +147,26 @@ def delete_cluster(cluster_id):
     """
     删除一个集群
     """
-    cluster_instance = Cluster.query.filter_by(id=cluster_id).first()
-
+    cluster_instance = Cluster.query.get(cluster_id)
     form = ClusterDeleteForm()
-
     if form.validate_on_submit():
-        pods = cluster_instance.pods.all()
-        for pod in pods:
-            if pod.type != 'server':
-                celery_node_delete.apply_async(args=['default', pod.name])
-            else:
-                celery_node_delete.apply_async(args=['default', pod.name, '{0}-8080'.format(pod.name)])
-            flash(u'成功！集群 {0} 删除节点 {1}。'.format(cluster_instance.name, pod.name), 'success')
-
-        # 数据库自动删除 cluster 关联 pod 记录
+        k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+        # delete all services
+        services = cluster_instance.services.all()
+        for service in services:
+            k.delete_service(service.namespace, service.name)
+            current_app.logger.debug('delete service is: {0}'.format(service.name))
+        # delete all statefulsets
+        statefulsets = cluster_instance.statefulsets.all()
+        for ss in statefulsets:
+            k.delete_statefulset(ss.namespace, ss.name)
+            for i in range(0, int(ss.replicas)):
+                k.delete_pod(ss.namespace, '{0}-{1}'.format(ss.name, i))
+            current_app.logger.debug('delete statefulset is: {0}'.format(ss.name))
+        # db delete all cluster records
         cluster_instance.delete()
-
         flash(u'成功！集群 {0} 被删除。'.format(cluster_instance.name), 'success')
-
         return redirect(url_for('cluster.index'))
-
     return render_template('cluster/cluster_delete.html', cluster=cluster_instance, form=form)
 
 

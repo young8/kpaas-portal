@@ -53,8 +53,16 @@ class KubeApiService():
     def delete_service(self):
         pass
 
-    def delete_statefulset(self):
-        pass
+    def delete_statefulset(self, namespace, name):
+        try:
+            url = '{0}/apis/apps/v1beta1/namespaces/{1}/statefulsets/{2}?orphanDependents=false'.format(self.base_url, namespace, name)
+            res = requests.delete(url)
+            if res.status_code == 200:
+                current_app.logger.debug('delete statefulset result: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def view_service(self):
         pass
@@ -81,6 +89,17 @@ class KubeApiService():
             raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
             return {}
 
+    def delete_service(self, namespace, name):
+        try:
+            url = '{0}/api/v1/namespaces/{1}/services/{2}'.format(self.base_url, namespace, name)
+            res = requests.delete(url)
+            if res.status_code == 200:
+                current_app.logger.debug('delete service result: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
+
     def get_statefulsets(self):
         pass
 
@@ -97,6 +116,17 @@ class KubeApiService():
 
     def get_pod(self):
         pass
+
+    def delete_pod(self, namespace, name):
+        try:
+            url = '{0}/api/v1/namespaces/{1}/pods/{2}'.format(self.base_url, namespace, name)
+            res = requests.delete(url)
+            if res.status_code == 200:
+                current_app.logger.debug('delete pod result: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def create_pod(self, namespace, data):
         try:
