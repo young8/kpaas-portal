@@ -27,12 +27,14 @@
                                 <div class="forum-name">
                                     {% if cluster.status == 'succeed' %}
                                         Status: <span class="label label-success">{{ cluster.status }}</span>
+                                    {% elif cluster.status == 'error' %}
+                                        Status: <span class="label label-danger">{{ cluster.status }}</span>
                                     {% else %}
                                         Status: <span class="label label-warning">{{ cluster.status }}</span>
                                     {% endif %}
                                 </div>
                                 <div class="forum-name">
-                                    Nodes: <span class="badge">{{ cluster.agent_count }}</span>
+                                    Nodes: <span class="badge"> {{ cluster.current_nodes }} / {{ cluster.type }} </span>
                                 </div>
                                 <div class="forum-name">
                                     Description: {{ cluster.description }}

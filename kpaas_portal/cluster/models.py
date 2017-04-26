@@ -25,6 +25,7 @@ class Cluster(db.Model, CRUDMixin):
     name = db.Column(db.String(255))
     description = db.Column(db.String(255))
     type = db.Column(db.Integer, default=0)
+    current_nodes = db.Column(db.Integer, default=0)
     machine = db.Column(db.String(1), default='s')
     status = db.Column(db.String(100))
     cluster_deployment = db.Column(db.SmallInteger, default=0)
@@ -485,6 +486,7 @@ class Service(db.Model, CRUDMixin):
     sport = db.Column(db.Integer, default=0)
     nport = db.Column(db.Integer, default=0)
     dport = db.Column(db.Integer, default=0)
+    status = db.Column(db.String(50))
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
     # Foreign Key
     cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id', ondelete='CASCADE'))

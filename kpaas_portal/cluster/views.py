@@ -39,6 +39,31 @@ def index():
     获取集群的列表
     """
     clusters = Cluster.query.filter_by(owner=current_user.id).order_by(Cluster.id.desc()).all()
+    k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+    for cluster in clusters:
+        services = cluster.services.all()
+        for service in services:
+            res = k.view_service(service.namespace, service.name)
+            if res and len(res['spec']['ports']) > 0:
+                current_app.logger.debug('nodeport is: {}'.format(res['spec']['ports'][0]['nodePort']))
+                cluster.status = 'ready'
+                cluster.save()
+            else:
+                cluster.status = 'error'
+                cluster.save()
+        statefulsets = cluster.statefulsets.all()
+        for ss in statefulsets:
+            res = k.view_statefulset(ss.namespace, ss.name)
+            if res and int(res['status'].get('replicas',0)) == int(cluster.type):
+                current_app.logger.debug('statefulset replicas is: {}'.format(int(res['status'].get('replicas',0))))
+                cluster.current_nodes = int(res['status'].get('replicas',0))
+                cluster.status = 'ready'
+                cluster.save()
+            else:
+                cluster.status = 'error'
+                cluster.save()
+
+        current_app.logger.debug('view cluster id: {0}, service is: {1}, statefulset is: {2}'.format(cluster.id, services, statefulsets))
 
     return render_template('cluster/index.html', clusters=clusters)
 
@@ -68,6 +93,7 @@ def create_cluster():
         q = Queue.Queue()
         # write into db: service
         server_service = Service(current_user.namespace, cluster_instance)
+        server_service.status = 'pending'
         server_service.save()
         q.put({'id': int(server_service.id), 'type': 'service', 'data': server_service.get_server_json})
         # write into db: server statefulset

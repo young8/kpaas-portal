@@ -64,8 +64,16 @@ class KubeApiService():
             raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
             return {}
 
-    def view_service(self):
-        pass
+    def view_service(self, namespace, name):
+        try:
+            url = '{0}/api/v1/namespaces/{1}/services/{2}'.format(self.base_url, namespace, name)
+            res = requests.get(url)
+            if res.status_code == 200:
+                current_app.logger.debug('view service is: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def view_statefulset(self, namespace, name):
         try:
