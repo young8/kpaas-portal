@@ -130,27 +130,27 @@ def create_cluster():
     return render_template('cluster/cluster_create.html', form=form)
 
 
-@cluster.route('/<int:cluster_id>')
-def view_cluster(cluster_id):
-    """
-    查看并管理一个集群
-    """
-    cluster_instance = Cluster.query.filter_by(id=cluster_id).first_or_404()
-    if not cluster_instance.cluster_deployment:
-        flash(u'警告！当前节点还没有部署 Hadoop 集群组件，不能进行工具集相关操作，请检查并选择部署操作！', 'warning')
-
-    service = Service.query.filter_by(cluster_id=cluster_id).first_or_404()
-    if (not service) or (service.nport is None):
-        flash(u'警告！当前 Hadoop 集群没有注册服务成功，这样会影响集群的正常使用，请检查或联系管理员！', 'warning')
-
-    statefulsets = StatefulSet.query.filter_by(cluster_id=cluster_id).all()
-    _statefulsets = []
-    for ss in statefulsets:
-        current_app.logger.debug('clusterid is: {0}, namespace is: {1}, statefulset is: {2}'.format(cluster_id, ss.namespace, ss.name))
-        k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
-        res = k.view_statefulset(ss.namespace, ss.name)
-
-    return render_template('cluster/cluster.html', cluster=cluster_instance, pods=[])
+# @cluster.route('/<int:cluster_id>')
+# def view_cluster(cluster_id):
+#     """
+#     查看并管理一个集群
+#     """
+#     cluster_instance = Cluster.query.filter_by(id=cluster_id).first_or_404()
+#     if not cluster_instance.cluster_deployment:
+#         flash(u'警告！当前节点还没有部署 Hadoop 集群组件，不能进行工具集相关操作，请检查并选择部署操作！', 'warning')
+#
+#     service = Service.query.filter_by(cluster_id=cluster_id).first_or_404()
+#     if (not service) or (service.nport is None):
+#         flash(u'警告！当前 Hadoop 集群没有注册服务成功，这样会影响集群的正常使用，请检查或联系管理员！', 'warning')
+#
+#     statefulsets = StatefulSet.query.filter_by(cluster_id=cluster_id).all()
+#     _statefulsets = []
+#     for ss in statefulsets:
+#         current_app.logger.debug('clusterid is: {0}, namespace is: {1}, statefulset is: {2}'.format(cluster_id, ss.namespace, ss.name))
+#         k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+#         res = k.view_statefulset(ss.namespace, ss.name)
+#
+#     return render_template('cluster/cluster.html', cluster=cluster_instance, pods=[])
 
 
 @cluster.route('/<cluster_id>/delete', methods=['GET', 'POST'])

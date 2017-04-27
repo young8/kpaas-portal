@@ -25,10 +25,12 @@
                                     Name: {{ cluster.name }}
                                 </div>
                                 <div class="forum-name">
-                                    {% if cluster.status == 'succeed' %}
-                                        Status: <span class="label label-success">{{ cluster.status }}</span>
-                                    {% elif cluster.status == 'error' %}
+                                    {% if cluster.status == 'error' %}
                                         Status: <span class="label label-danger">{{ cluster.status }}</span>
+                                    {% elif cluster.status == 'ready' %}
+                                        Status: <span class="label label-primary">{{ cluster.status }}</span>
+                                    {% elif cluster.status == 'succeed' %}
+                                        Status: <span class="label label-success">{{ cluster.status }}</span>
                                     {% else %}
                                         Status: <span class="label label-warning">{{ cluster.status }}</span>
                                     {% endif %}
