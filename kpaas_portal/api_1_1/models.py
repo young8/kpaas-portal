@@ -122,8 +122,16 @@ class KubeApiService():
             raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
             return {}
 
-    def get_pod(self):
-        pass
+    def view_pod(self, namespace, name):
+        try:
+            url = '{0}/api/v1/namespaces/{1}/pods/{2}'.format(self.base_url, namespace, name)
+            res = requests.get(url)
+            if res.status_code == 200:
+                current_app.logger.debug('view pod is: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise KubeApiError(description='kube api server connect error: {}'.format(e.message))
+            return {}
 
     def delete_pod(self, namespace, name):
         try:

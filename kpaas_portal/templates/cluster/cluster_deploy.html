@@ -13,30 +13,30 @@
             <table class="table table-bordered">
                 <thead>
                 <tr>
-                    <th>节点 HOST</th>
+                    <th>节点名称</th>
                     <th>节点 IP</th>
-                    <th>节点 STATUS</th>
-                    <th>节点 CHECKED</th>
+                    <th>节点状态</th>
+                    <th>节点是否注册</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% if pods %}
-                    {% for pod in pods %}
+                {% if sss %}
+                    {% for ss in sss %}
                         <tr>
-                            <td>{{ pod.name }}</td>
-                            <td>{{ pod.sip }}</td>
+                            <td>{{ ss.name }}</td>
+                            <td>{{ ss.ip }}</td>
                             <td>
-                                {% if pod.status== "Running" %}
-                                    <span class="label label-success">{{ pod.status }}</span>
+                                {% if ss.status== "Running" %}
+                                    <span class="label label-success">{{ ss.status }}</span>
                                 {% else %}
-                                    <span class="label label-danger">{{ pod.status }}</span>
+                                    <span class="label label-danger">{{ ss.status }}</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if pod.configure== "HEALTHY" %}
-                                    <span class="label label-success">{{ pod.configure }}</span>
+                                {% if ss.register %}
+                                    <span class="label label-success">{{ ss.register }}</span>
                                 {% else %}
-                                    <span class="label label-danger">{{ pod.configure }}</span>
+                                    <span class="label label-danger">{{ ss.register }}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -51,7 +51,7 @@
                     <div class="controls">
                         {{ form.submit(class="btn btn-primary") }}
                         或 <a class="btn btn-link"
-                             href="{{ url_for('cluster.view_cluster', cluster_id=cluster.id) }}">取消</a>
+                             href="{{ url_for('cluster.index') }}">取消</a>
                     </div>
                 </div>
             </form>

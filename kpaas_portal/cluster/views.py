@@ -130,33 +130,11 @@ def create_cluster():
     return render_template('cluster/cluster_create.html', form=form)
 
 
-# @cluster.route('/<int:cluster_id>')
-# def view_cluster(cluster_id):
-#     """
-#     查看并管理一个集群
-#     """
-#     cluster_instance = Cluster.query.filter_by(id=cluster_id).first_or_404()
-#     if not cluster_instance.cluster_deployment:
-#         flash(u'警告！当前节点还没有部署 Hadoop 集群组件，不能进行工具集相关操作，请检查并选择部署操作！', 'warning')
-#
-#     service = Service.query.filter_by(cluster_id=cluster_id).first_or_404()
-#     if (not service) or (service.nport is None):
-#         flash(u'警告！当前 Hadoop 集群没有注册服务成功，这样会影响集群的正常使用，请检查或联系管理员！', 'warning')
-#
-#     statefulsets = StatefulSet.query.filter_by(cluster_id=cluster_id).all()
-#     _statefulsets = []
-#     for ss in statefulsets:
-#         current_app.logger.debug('clusterid is: {0}, namespace is: {1}, statefulset is: {2}'.format(cluster_id, ss.namespace, ss.name))
-#         k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
-#         res = k.view_statefulset(ss.namespace, ss.name)
-#
-#     return render_template('cluster/cluster.html', cluster=cluster_instance, pods=[])
-
-
 @cluster.route('/<cluster_id>/delete', methods=['GET', 'POST'])
+@login_required
 def delete_cluster(cluster_id):
     """
-    删除一个集群
+    删除集群
     """
     cluster_instance = Cluster.query.get(cluster_id)
     form = ClusterDeleteForm()
@@ -182,44 +160,50 @@ def delete_cluster(cluster_id):
 
 
 @cluster.route('/<cluster_id>/deploy', methods=['GET', 'POST'])
+@login_required
 def deploy_cluster(cluster_id):
     """
-    部署一个集群
+    部署集群
     """
-    cluster_instance = Cluster.query.filter_by(id=cluster_id).first()
-
+    cluster_instance = Cluster.query.get(cluster_id)
     if cluster_instance.cluster_deployment != 0:
-        flash(u'失败！集群 {0} 已经部署过了，不能重新部署，请查看。'.format(cluster_instance.name), 'danger')
-        return redirect(cluster_instance.url)
-
-    agent_count = cluster_instance.get_agent_count()
-    if agent_count != cluster_instance.type:
+        flash(u'失败！集群 {} 已经部署过了，不能重新部署，请查看。'.format(cluster_instance.name), 'danger')
+    if not cluster_instance.status == 'ready':
         flash(
-            u'失败！集群 {0} 中节点数量为 {1} 未达到申请节点数量 {2}，请查看。'.format(cluster_instance.name, agent_count,
-                                                              cluster_instance.type), 'danger')
-        return redirect(cluster_instance.url)
-
-    ambari_server = cluster_instance.pods.filter_by(type='server').first()
-    ambari_instance = AmbariServiceClass(ambari_server.sip)
-
-    pods = cluster_instance.pods.filter_by(type='agent').all()
-    for pod in pods:
-        pod.configure = ambari_instance.host_info(pod.name).get('host_status')
-        pod.save()
-
+            u'失败！集群 {} 节点资源还没有准备好，请查看。'.format(cluster_instance.name), 'danger')
+    sss = []
+    k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
+    # get server info
+    server_name = '{0}-server-0'.format(cluster_instance.name)
+    server_info = k.view_pod(current_user.namespace, server_name)
+    sss.append({
+        'name': server_name,
+        'ip': server_info['status'].get('podIP', ''),
+        'status': server_info['status'].get('phase', ''),
+        'register': False
+    })
+    current_app.logger.debug(
+        'cluster is: {0}, server pod is: {1}, data is: "{2}"'.format(cluster_instance.name, server_name, server_info))
+    # get agents info
+    for i in range(0, int(cluster_instance.current_nodes)):
+        agent_name = '{0}-agent-{1}'.format(cluster_instance.name, i)
+        agent_info = k.view_pod(current_user.namespace, agent_name)
+        sss.append({
+            'name': agent_name,
+            'ip': agent_info['status'].get('podIP', ''),
+            'status': agent_info['status'].get('phase', ''),
+            'register': False
+        })
+        current_app.logger.debug(
+            'cluster is: {0}, agent pod is: {1}, data is: "{2}"'.format(cluster_instance.name, agent_name, agent_info))
     form = ClusterDeployForm()
-
     if form.validate_on_submit():
         cluster_instance.cluster_deployment = 1
+        cluster_instance.status = 'deploying'
         cluster_instance.save()
-
-        celery_cluster_deploy.apply_async(args=[cluster_instance.id])
-
         flash(u'成功！集群 {0} 已经提交部署。'.format(cluster_instance.name), 'success')
-
-        return redirect(cluster_instance.url)
-
-    return render_template('cluster/cluster_deploy.html', cluster=cluster_instance, pods=pods, form=form)
+        return redirect(url_for('cluster.index'))
+    return render_template('cluster/cluster_deploy.html', cluster=cluster_instance, sss=sss, form=form)
 
 
 @cluster.route('/<int:cluster_id>/open')
