@@ -20,7 +20,7 @@ from kpaas_portal.utils.ambaritools import AmbariServiceClass
 from kpaas_portal.utils.k8stools import celery_node_delete, celery_cluster_create, celery_cluster_deploy
 from kpaas_portal.utils.haproxytools import HaproxyServiceClass
 
-from kpaas_portal.api_1_1.models import KubeApiService
+from kpaas_portal.api_1_1.models import KubeApiService, AmbariApiService
 
 cluster = Blueprint('cluster', __name__)
 mylogger = logging.getLogger('app')
@@ -175,9 +175,10 @@ def deploy_cluster(cluster_id):
     k = KubeApiService(host=current_app.config['K8S_SERVICE_ADDR'], port=current_app.config['K8S_SERVICE_PORT'])
     # get server info
     server_name = '{0}-server-0'.format(cluster_instance.name)
+    server_fullname = '{0}.node.{1}.svc.cluster.local'.format(server_name, current_user.namespace)
     server_info = k.view_pod(current_user.namespace, server_name)
     sss.append({
-        'name': server_name,
+        'name': server_fullname,
         'ip': server_info['status'].get('podIP', ''),
         'status': server_info['status'].get('phase', ''),
         'register': False
@@ -185,14 +186,24 @@ def deploy_cluster(cluster_id):
     current_app.logger.debug(
         'cluster is: {0}, server pod is: {1}, data is: "{2}"'.format(cluster_instance.name, server_name, server_info))
     # get agents info
+    ambari_instance = AmbariApiService('42.123.106.18', 10011)
+    nodes = ambari_instance.register_nodes()
+    ambari_nodes = []
+    if nodes['items']:
+        ambari_nodes = [n['Hosts']['host_name'] for n in nodes['items']]
+    current_app.logger.debug('ambari register nodes is: "{}"'.format(ambari_nodes))
     for i in range(0, int(cluster_instance.current_nodes)):
         agent_name = '{0}-agent-{1}'.format(cluster_instance.name, i)
+        agent_fullname = '{0}.node.{1}.svc.cluster.local'.format(agent_name, current_user.namespace)
+        is_register = False
+        if agent_fullname in ambari_nodes:
+            is_register = True
         agent_info = k.view_pod(current_user.namespace, agent_name)
         sss.append({
-            'name': agent_name,
+            'name': agent_fullname,
             'ip': agent_info['status'].get('podIP', ''),
             'status': agent_info['status'].get('phase', ''),
-            'register': False
+            'register': is_register
         })
         current_app.logger.debug(
             'cluster is: {0}, agent pod is: {1}, data is: "{2}"'.format(cluster_instance.name, agent_name, agent_info))

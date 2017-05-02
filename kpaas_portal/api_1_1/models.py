@@ -10,9 +10,9 @@
 
 import json
 import requests
-
 from flask import current_app
-from kpaas_portal.exceptions import KubeApiError
+
+from kpaas_portal.exceptions import KubeApiError, AmbariApiError
 
 
 class KubeApiService():
@@ -185,11 +185,24 @@ class AmbariServerParse():
 
 
 class AmbariApiService():
-    def __init__(self):
-        pass
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.base_url = 'http://{0}:{1}'.format(self.host, self.port)
+        self.headers = {'X-Requested-By': 'ambari'}
+        self.auth = ('admin', 'admin')
+        current_app.logger.debug('ambari api server url is: {}'.format(self.base_url))
 
     def register_nodes(self):
-        pass
+        try:
+            url = '{}/api/v1/hosts'.format(self.base_url)
+            res = requests.get(url, headers=self.headers, auth=self.auth)
+            if res.status_code == 200:
+                current_app.logger.debug('nodes: {}'.format(res.text))
+                return res.json()
+        except requests.ConnectionError as e:
+            raise AmbariApiError(description='ambari api server connect error: {}'.format(e.message))
+            return {}
 
     def create_cluster(self):
         pass

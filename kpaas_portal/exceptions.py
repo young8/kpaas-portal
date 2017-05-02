@@ -26,5 +26,9 @@ class KubeApiError(BaseError):
     description = "Kubernetes API Error."
 
 
+class AmbariApiError(BaseError):
+    description = "Ambari API Error."
+
+
 class ConsulApiError(BaseError):
     description = "Consul API Error."
